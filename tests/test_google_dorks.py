@@ -15,5 +15,6 @@ async def test_generate_categories_with_domain(mock_config) -> None:
     result = await run(session, semaphore, mock_config, domain="example.com", email=None, enable_live_check=False)
 
     assert result.skipped is False
-    assert len(result.results) >= 1
+    assert len(result.results) >= 6
+    assert sum(len(category.queries) for category in result.results) >= 20
     assert result.score_impact == 0

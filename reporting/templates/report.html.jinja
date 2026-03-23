@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DIGITAL EXPOSURE REPORT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0d1117;
@@ -17,18 +20,23 @@
       --pass: #2ecc71;
       --border: #30363d;
       --critical: #ff0000;
+      --cyan: #4dd0e1;
     }
 
     body {
       margin: 0;
       background: var(--bg);
       color: var(--text);
-      font-family: Inter, system-ui, -apple-system, sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
       display: flex;
     }
 
+    code, .mono, table td.value {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
     aside {
-      width: 260px;
+      width: 280px;
       position: fixed;
       top: 0;
       bottom: 0;
@@ -36,6 +44,7 @@
       background: var(--card);
       border-right: 1px solid var(--border);
       padding: 16px;
+      box-sizing: border-box;
     }
 
     aside a {
@@ -43,12 +52,14 @@
       text-decoration: none;
       display: block;
       margin: 8px 0;
+      font-size: 14px;
     }
 
     main {
-      margin-left: 280px;
-      width: calc(100% - 280px);
+      margin-left: 300px;
+      width: calc(100% - 300px);
       padding: 24px;
+      box-sizing: border-box;
     }
 
     .card {
@@ -59,17 +70,23 @@
       margin: 16px 0;
     }
 
+    .subsection-title {
+      margin: 18px 0 8px;
+      font-size: 16px;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
+      margin-top: 8px;
     }
 
-    th,
-    td {
+    th, td {
       border: 1px solid var(--border);
       padding: 8px;
       text-align: left;
+      vertical-align: top;
     }
 
     .badge {
@@ -82,7 +99,27 @@
     .green { background: rgba(46, 204, 113, 0.2); color: var(--pass); }
     .yellow { background: rgba(243, 156, 18, 0.2); color: var(--medium); }
     .red { background: rgba(255, 77, 79, 0.2); color: var(--high); }
+    .blue { background: rgba(88, 166, 255, 0.2); color: var(--accent); }
+    .cyan { background: rgba(77, 208, 225, 0.2); color: var(--cyan); }
+    .gray { background: rgba(139, 148, 158, 0.2); color: var(--muted); }
     .muted { color: var(--muted); }
+    .italic { font-style: italic; }
+
+    .alert {
+      border-left: 4px solid var(--high);
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: rgba(255, 77, 79, 0.12);
+      margin: 10px 0;
+    }
+
+    .info-card {
+      border-left: 4px solid var(--medium);
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: rgba(243, 156, 18, 0.12);
+      margin: 10px 0;
+    }
 
     .stat-grid {
       display: grid;
@@ -90,37 +127,156 @@
       gap: 12px;
     }
 
+    .stat-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      background: #11161d;
+    }
+
+    .stat-item strong {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .stat-item span {
+      display: block;
+      margin-top: 6px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .gauge-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 24px 0;
+    }
+
+    .gauge {
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: background 0.4s ease;
+    }
+
+    .gauge::after {
+      content: "";
+      position: absolute;
+      width: 162px;
+      height: 162px;
+      border-radius: 50%;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+
+    .gauge-label {
+      position: absolute;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      z-index: 1;
+    }
+
+    .score-number {
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .score-denom { font-size: 18px; color: var(--muted); }
+    .score-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    .sev-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 6px 0;
+    }
+
+    .sev-label { width: 80px; font-size: 13px; color: var(--muted); }
+
+    .sev-bar-wrap {
+      flex: 1;
+      height: 10px;
+      background: var(--border);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .sev-bar { height: 100%; border-radius: 5px; transition: width 0.4s ease; }
+    .sev-count { width: 30px; font-size: 13px; text-align: right; }
+
     .search-row {
       display: flex;
       justify-content: space-between;
       gap: 12px;
       margin-bottom: 12px;
+      align-items: center;
+      flex-wrap: wrap;
     }
 
-    input, select {
+    input, select, button {
       background: #0b0f14;
       color: var(--text);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 8px;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .platform-badge {
+      display: block;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px;
+      font-size: 13px;
+      word-break: break-word;
+    }
+
+    .platform-badge small {
+      display: block;
+      margin-top: 2px;
+      opacity: 0.9;
+    }
+
+    pre {
+      background: #0b0f14;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      overflow: auto;
+    }
+
+    @media (max-width: 1100px) {
+      aside { display: none; }
+      main { margin-left: 0; width: 100%; }
+      .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 
     @media print {
-      body {
-        background: #ffffff;
-        color: #000000;
-        display: block;
-      }
-      aside {
-        display: none;
-      }
-      main {
-        margin: 0;
-        width: 100%;
-      }
-      .card {
-        border-color: #cccccc;
-      }
+      body { background: #ffffff; color: #000000; display: block; }
+      aside { display: none; }
+      main { margin: 0; width: 100%; }
+      .card { border-color: #cccccc; }
     }
   </style>
 </head>
@@ -137,8 +293,9 @@
     <a href="#email-authentication">8. Email Authentication</a>
     <a href="#document-metadata">9. Document Metadata</a>
     <a href="#google-dork-recipe">10. Google Dork Recipe</a>
-    <a href="#risk-summary">11. Risk Summary & Recommendations</a>
-    <a href="#appendix">12. Appendix</a>
+    <a href="#shodan-recon">11. Shodan Recon</a>
+    <a href="#risk-summary">12. Risk Summary & Recommendations</a>
+    <a href="#appendix">13. Appendix</a>
   </aside>
 
   <main>
@@ -151,21 +308,91 @@
 
     <section id="executive-summary" class="card">
       <h2>Executive Summary</h2>
-      <p><strong>Exposure Score:</strong> {{ score }} / 100 — {{ label }}</p>
+      <div class="gauge-wrap">
+        <div class="gauge" style="background: conic-gradient({{ gauge_color }} {{ score }}%, var(--border) {{ score }}%);">
+          <div class="gauge-label">
+            <span class="score-number">{{ score }}</span>
+            <span class="score-denom">/100</span>
+            <span class="score-label">{{ label }}</span>
+          </div>
+        </div>
+      </div>
+
       <div class="stat-grid">
-        <div class="card"><strong>Credential Breaches</strong><br>{{ credential_leak.total_breaches }}</div>
-        <div class="card"><strong>GitHub Secrets</strong><br>{{ github_footprint.secrets_found | length }}</div>
-        <div class="card"><strong>Social Profiles Exposed</strong><br>{{ social_footprint.total_exposure_count }}</div>
-        <div class="card"><strong>Email Spoofability</strong><br>{{ dns_email_auth.spoofability_score }}/10</div>
+        <div class="stat-item"><strong>Credential Leaks</strong><span>{{ credential_leak.summary_count }}</span></div>
+        <div class="stat-item"><strong>GitHub Secrets</strong><span>{{ github.secret_count }}</span></div>
+        <div class="stat-item"><strong>Social Profiles Exposed</strong><span>{{ social.total_exposure_count }}</span></div>
+        <div class="stat-item"><strong>Email Spoofability</strong><span>{% if dns_auth.skipped %}—{% else %}{{ dns_auth.spoofability_score }}/10{% endif %}</span></div>
+        <div class="stat-item"><strong>Shodan Open Ports</strong><span>{% if shodan.skipped %}—{% else %}{{ shodan.total_open_ports }}{% endif %}</span></div>
+      </div>
+
+      {% set total_findings = findings | length %}
+      <h3 class="subsection-title">Severity Breakdown</h3>
+      <div class="sev-row">
+        <span class="sev-label">CRITICAL</span>
+        <div class="sev-bar-wrap"><div class="sev-bar" style="width: {{ (severity_counts.CRITICAL / (total_findings if total_findings > 0 else 1) * 100) | round(2) }}%; background: var(--critical);"></div></div>
+        <span class="sev-count">{{ severity_counts.CRITICAL }}</span>
+      </div>
+      <div class="sev-row">
+        <span class="sev-label">HIGH</span>
+        <div class="sev-bar-wrap"><div class="sev-bar" style="width: {{ (severity_counts.HIGH / (total_findings if total_findings > 0 else 1) * 100) | round(2) }}%; background: var(--high);"></div></div>
+        <span class="sev-count">{{ severity_counts.HIGH }}</span>
+      </div>
+      <div class="sev-row">
+        <span class="sev-label">MEDIUM</span>
+        <div class="sev-bar-wrap"><div class="sev-bar" style="width: {{ (severity_counts.MEDIUM / (total_findings if total_findings > 0 else 1) * 100) | round(2) }}%; background: var(--medium);"></div></div>
+        <span class="sev-count">{{ severity_counts.MEDIUM }}</span>
+      </div>
+      <div class="sev-row">
+        <span class="sev-label">LOW</span>
+        <div class="sev-bar-wrap"><div class="sev-bar" style="width: {{ (severity_counts.LOW / (total_findings if total_findings > 0 else 1) * 100) | round(2) }}%; background: var(--low);"></div></div>
+        <span class="sev-count">{{ severity_counts.LOW }}</span>
+      </div>
+      <div class="sev-row">
+        <span class="sev-label">INFO</span>
+        <div class="sev-bar-wrap"><div class="sev-bar" style="width: {{ (severity_counts.INFO / (total_findings if total_findings > 0 else 1) * 100) | round(2) }}%; background: var(--muted);"></div></div>
+        <span class="sev-count">{{ severity_counts.INFO }}</span>
       </div>
     </section>
 
     <section id="credential-leaks" class="card">
-      <h2>Credential Leaks</h2>
-      {% if credential_leak.demo_mode %}
-      <p class="badge yellow">⚠️ Demo Mode — Breach data loaded from fixture file.</p>
-      {% endif %}
+      <h2>Credential Leaks
+        {% if credential_leak.engine == 'leakcheck' %}
+        <span class="badge green">LeakCheck ({{ credential_leak.leakcheck_mode|default('public')|title }})</span>
+        {% else %}
+        <span class="badge yellow">HIBP ({{ credential_leak.mode|default('free')|title }})</span>
+        {% endif %}
+      </h2>
 
+      {% if credential_leak.engine == 'leakcheck' %}
+        {% if credential_leak.leakcheck_found > 0 %}
+          {% if credential_leak.leakcheck_mode == 'public' %}
+          <p class="muted">Note: In Public mode, only breach source names are available. Upgrade to Authenticated mode for field-level detail.</p>
+          {% endif %}
+          <div class="search-row">
+            <input type="text" id="leakcheckSearch" placeholder="Search source name" />
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>Date</th>
+                <th>Password Type</th>
+                <th>Fields</th>
+                <th>Severity</th>
+              </tr>
+            </thead>
+            <tbody id="leakcheckTableBody"></tbody>
+          </table>
+          <div class="search-row">
+            <button id="leakPrevPage">Previous</button>
+            <span id="leakPageInfo" class="muted"></span>
+            <button id="leakNextPage">Next</button>
+          </div>
+        {% else %}
+          <p class="badge green">No breach sources found.</p>
+        {% endif %}
+      {% else %}
       <div class="search-row">
         <input type="text" id="breachSearch" placeholder="Search breach name/domain" />
         <select id="verifiedFilter">
@@ -193,16 +420,386 @@
         <span id="pageInfo" class="muted"></span>
         <button id="nextPage">Next</button>
       </div>
+      {% endif %}
     </section>
 
-    <section id="github-exposure" class="card"><h2>GitHub Exposure</h2></section>
-    <section id="email-intelligence" class="card"><h2>Email Intelligence</h2></section>
-    <section id="social-footprint" class="card"><h2>Social Footprint</h2></section>
-    <section id="paste-site-exposure" class="card"><h2>Paste Site Exposure</h2></section>
-    <section id="js-file-secrets" class="card"><h2>JS File Secrets</h2></section>
-    <section id="email-authentication" class="card"><h2>Email Authentication</h2></section>
-    <section id="document-metadata" class="card"><h2>Document Metadata</h2></section>
-    <section id="google-dork-recipe" class="card"><h2>Google Dork Recipe</h2></section>
+    <section id="github-exposure" class="card">
+      <h2>GitHub Exposure</h2>
+      {% if github.skipped %}
+      <p class="badge yellow">{{ github.skip_reason }}</p>
+      {% else %}
+      <p>Found {{ github.total_repos }} repositories ({{ github.active_repos_30d }} active in last 30 days). Secrets detected: {{ github.secret_count }}</p>
+
+      <h3 class="subsection-title">Repositories</h3>
+      {% if github.total_repos == 0 %}
+      <p class="muted">No repositories found.</p>
+      {% else %}
+      <table>
+        <thead>
+          <tr>
+            <th>Repository</th>
+            <th>Language</th>
+            <th>Stars</th>
+            <th>Last Pushed</th>
+            <th>Active (≤30d)</th>
+            <th>Risk</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for repo in github.repositories %}
+          <tr>
+            <td><a href="{{ repo.html_url }}" target="_blank">{{ repo.name }}</a></td>
+            <td>{{ repo.language or '—' }}</td>
+            <td>{{ repo.stars }}</td>
+            <td class="mono">{{ repo.last_pushed or '—' }}</td>
+            <td>{% if repo.active %}<span class="badge red">YES</span>{% else %}<span class="badge gray">NO</span>{% endif %}</td>
+            <td>{% if repo.active %}<span class="badge yellow">Review</span>{% else %}<span class="badge gray">Low</span>{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+
+      <h3 class="subsection-title">Secrets</h3>
+      {% if github.secret_count > 0 %}
+      <div class="alert">⚠️ CRITICAL: Secret material detected in public repositories.</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Repository</th>
+            <th>File Path</th>
+            <th>Secret Type</th>
+            <th>Masked Value</th>
+            <th>Severity</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for secret in github.secrets_found %}
+          <tr>
+            <td>{{ secret.repo }}</td>
+            <td class="mono">{{ secret.file_path }}</td>
+            <td>{{ secret.pattern_type }}</td>
+            <td class="mono">{{ secret.masked_value }}</td>
+            <td>
+              {% if secret.severity == 'CRITICAL' %}<span class="badge red">CRITICAL</span>
+              {% elif secret.severity == 'HIGH' %}<span class="badge red">HIGH</span>
+              {% elif secret.severity == 'MEDIUM' %}<span class="badge yellow">MEDIUM</span>
+              {% else %}<span class="badge gray">LOW</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p><span class="badge green">No secrets detected in scanned repositories.</span></p>
+      {% endif %}
+      {% endif %}
+    </section>
+
+    <section id="email-intelligence" class="card">
+      <h2>Email Intelligence</h2>
+      {% if email_intel.skipped %}
+      <p class="badge yellow">{{ email_intel.skip_reason }}</p>
+      {% else %}
+      <table>
+        <tbody>
+          <tr><th>Email Address</th><td class="value mono">{{ email_intel.email or 'N/A' }}</td></tr>
+          <tr><th>Domain</th><td>{{ email_intel.domain or 'N/A' }}</td></tr>
+          <tr><th>Format Valid</th><td>{% if email_intel.format_valid %}<span class="badge green">✓ Valid</span>{% else %}<span class="badge red">✗ Invalid</span>{% endif %}</td></tr>
+          <tr><th>Mail Provider</th><td>{{ email_intel.mail_provider or 'Unknown' }}</td></tr>
+          <tr><th>Is Disposable</th><td>{% if email_intel.is_disposable %}<span class="badge red">⚠ Yes — Throwaway address</span>{% else %}<span class="badge green">No</span>{% endif %}</td></tr>
+          <tr><th>MX Records</th><td>{% if email_intel.mx_records and email_intel.mx_records|length > 0 %}{{ email_intel.mx_records|join(', ') }}{% else %}<span class="badge red">None found</span>{% endif %}</td></tr>
+          <tr>
+            <th>SMTP Verified</th>
+            <td>
+              {% if email_intel.smtp_verified == 'VERIFIED' %}<span class="badge green">VERIFIED</span>
+              {% elif email_intel.smtp_verified == 'UNKNOWN' %}<span class="badge yellow">UNKNOWN</span>
+              {% else %}<span class="badge red">UNVERIFIED</span>{% endif %}
+              <span title="SMTP VRFY is disabled by most mail servers. UNKNOWN is the expected result and does not indicate an error in this tool.">ℹ</span>
+            </td>
+          </tr>
+          <tr><th>SPF Present</th><td>{% if email_intel.spf_present %}<span class="badge green">✓ Present</span>{% else %}<span class="badge yellow">✗ Missing</span>{% endif %}</td></tr>
+        </tbody>
+      </table>
+      {% if email_intel.risk_notes is defined and email_intel.risk_notes %}
+      <div class="info-card">
+        <ul>
+          {% for note in email_intel.risk_notes %}
+          <li>{{ note }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+      {% endif %}
+    </section>
+
+    <section id="social-footprint" class="card">
+      <h2>Social Footprint</h2>
+      {% if social.skipped %}
+      <p class="badge yellow">{{ social.skip_reason }}</p>
+      {% else %}
+      <p>Username variants checked: {{ social.username_variants | join(', ') }}</p>
+      <div class="grid-4">
+        {% for profile in social.profiles %}
+          {% if profile.status == 'EXPOSED' %}
+            {% set c = 'green' %}
+          {% elif profile.status == 'UNKNOWN' %}
+            {% set c = 'yellow' %}
+          {% else %}
+            {% set c = 'gray' %}
+          {% endif %}
+          <a class="platform-badge {{ c }}" href="{{ profile.url }}" target="_blank">
+            {{ profile.platform }}
+            <small>{{ profile.status }}</small>
+          </a>
+        {% endfor %}
+      </div>
+
+      <h3 class="subsection-title">Positive Signals</h3>
+      {% set positive = social.profiles | selectattr('is_positive_signal') | selectattr('status', 'equalto', 'EXPOSED') | list %}
+      {% if positive|length > 0 %}
+        {% for profile in positive %}
+        <p><a href="{{ profile.url }}" target="_blank" class="badge cyan">{{ profile.platform }} — Security Researcher — positive signal.</a></p>
+        {% endfor %}
+      {% else %}
+        <p class="muted">No positive security-signal platforms found.</p>
+      {% endif %}
+
+      <p>{{ social.total_exposure_count }} platform(s) exposed ({{ social.positive_signal_count }} positive security signals excluded)</p>
+      {% endif %}
+    </section>
+
+    <section id="paste-site-exposure" class="card">
+      <h2>Paste Site Exposure</h2>
+      {% if pastes.mode == 'leakcheck' %}
+      <div class="blue info-card">ℹ️ Paste lookup is not available in LeakCheck mode. Re-run with --use-hibp and Premium mode for paste site results.</div>
+      {% elif pastes.mode == 'free' %}
+      <p class="muted">Paste lookup requires Premium HIBP mode. Re-run with --use-hibp for per-email paste site results.</p>
+      {% elif pastes.total_pastes > 0 %}
+      <div class="alert">⚠️ Email found in {{ pastes.total_pastes }} public paste(s).</div>
+      <table>
+        <thead>
+          <tr><th>Source</th><th>ID</th><th>Title</th><th>Date</th><th>Email Count</th></tr>
+        </thead>
+        <tbody>
+          {% for paste in pastes.pastes %}
+          <tr>
+            <td>{{ paste.source }}</td>
+            <td class="mono">{{ paste.identifier }}</td>
+            <td>{{ paste.title }}</td>
+            <td>{{ paste.date }}</td>
+            <td>{{ paste.email_count }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p><span class="badge green">No paste site exposure detected.</span></p>
+      {% endif %}
+    </section>
+
+    <section id="js-file-secrets" class="card">
+      <h2>JS File Secrets</h2>
+      {% if js_secrets.skipped %}
+      <p class="badge yellow">{{ js_secrets.skip_reason }}</p>
+      {% else %}
+      <p>Scanned {{ js_secrets.js_files_scanned }} JS file(s).</p>
+      {% if js_secrets.secrets_found and js_secrets.secrets_found|length > 0 %}
+      <div class="alert">⚠️ Secret material detected in public JS files.</div>
+      <table>
+        <thead>
+          <tr><th>File URL</th><th>Secret Type</th><th>Masked Value</th><th>Severity</th></tr>
+        </thead>
+        <tbody>
+          {% for secret in js_secrets.secrets_found %}
+          <tr>
+            <td class="mono"><a href="{{ secret.js_file_url }}" target="_blank">{{ secret.js_file_url }}</a></td>
+            <td>{{ secret.pattern_type }}</td>
+            <td class="mono">{{ secret.masked_value }}</td>
+            <td>
+              {% if secret.severity == 'CRITICAL' or secret.severity == 'HIGH' %}<span class="badge red">{{ secret.severity }}</span>
+              {% elif secret.severity == 'MEDIUM' %}<span class="badge yellow">MEDIUM</span>
+              {% else %}<span class="badge gray">LOW</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p><span class="badge green">No secrets detected in scanned JS files.</span></p>
+      {% endif %}
+
+      {% if js_secrets.internal_endpoints_found and js_secrets.internal_endpoints_found|length > 0 %}
+      <div class="info-card">Internal endpoints exposed: <span class="mono">{{ js_secrets.internal_endpoints_found | join(', ') }}</span></div>
+      {% endif %}
+      {% if js_secrets.environment_hints and js_secrets.environment_hints|length > 0 %}
+      <div class="info-card">Environment hints detected: <span class="mono">{{ js_secrets.environment_hints | join(', ') }}</span></div>
+      {% endif %}
+      {% endif %}
+    </section>
+
+    <section id="email-authentication" class="card">
+      <h2>Email Authentication</h2>
+      {% if dns_auth.skipped %}
+      <div class="info-card">DNS Email Authentication scan requires a domain target. Re-run with --domain flag to see SPF, DMARC, DKIM, and MTA-STS analysis.</div>
+      {% else %}
+      {% set spf_strength = dns_auth.spf.strength or 'MISSING' %}
+      {% set dmarc_policy = dns_auth.dmarc.policy or 'MISSING' %}
+      {% set dkim_count = dns_auth.dkim.selectors_found | length %}
+      {% set mta_mode = dns_auth.mta_sts.mode or 'MISSING' %}
+      <table>
+        <thead>
+          <tr><th>Record</th><th>Status</th><th>Detail</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>SPF</td>
+            <td>
+              {% if spf_strength == 'STRICT' %}<span class="badge green">STRICT</span>
+              {% elif spf_strength == 'SOFT' or spf_strength == 'OPEN' %}<span class="badge yellow">{{ spf_strength }}</span>
+              {% else %}<span class="badge red">MISSING</span>{% endif %}
+            </td>
+            <td>{{ spf_strength }}</td>
+          </tr>
+          <tr>
+            <td>DMARC</td>
+            <td>
+              {% if dmarc_policy == 'reject' %}<span class="badge green">REJECT</span>
+              {% elif dmarc_policy == 'quarantine' or dmarc_policy == 'none' %}<span class="badge yellow">{{ dmarc_policy|upper }}</span>
+              {% else %}<span class="badge red">MISSING</span>{% endif %}
+            </td>
+            <td>{{ dmarc_policy }}{% if dns_auth.dmarc.rua %} | rua={{ dns_auth.dmarc.rua }}{% endif %}</td>
+          </tr>
+          <tr>
+            <td>DKIM</td>
+            <td>{% if dkim_count > 0 %}<span class="badge green">FOUND</span>{% else %}<span class="badge red">MISSING</span>{% endif %}</td>
+            <td>{% if dkim_count > 0 %}{{ dkim_count }} selector(s) found{% else %}No selectors found{% endif %}</td>
+          </tr>
+          <tr>
+            <td>MTA-STS</td>
+            <td>
+              {% if mta_mode == 'enforce' %}<span class="badge green">ENFORCE</span>
+              {% elif mta_mode == 'testing' or mta_mode == 'none' %}<span class="badge yellow">{{ mta_mode|upper }}</span>
+              {% else %}<span class="badge red">MISSING</span>{% endif %}
+            </td>
+            <td>{{ mta_mode }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      {% if dns_auth.spoofability_score <= 3 %}
+      <p><span class="badge green">LOW SPOOFING RISK ({{ dns_auth.spoofability_score }}/10)</span></p>
+      {% elif dns_auth.spoofability_score <= 6 %}
+      <p><span class="badge yellow">MEDIUM SPOOFING RISK ({{ dns_auth.spoofability_score }}/10)</span></p>
+      {% else %}
+      <p><span class="badge red">HIGH SPOOFING RISK ({{ dns_auth.spoofability_score }}/10)</span></p>
+      {% endif %}
+      {% endif %}
+    </section>
+
+    <section id="document-metadata" class="card">
+      <h2>Document Metadata</h2>
+      {% if metadata.skipped %}
+      <p class="badge yellow">{{ metadata.skip_reason }}</p>
+      {% else %}
+      <p>Found {{ metadata.documents_found }} document(s), scanned {{ metadata.documents_scanned }}.</p>
+      {% if metadata.findings and metadata.findings|length > 0 %}
+      <table>
+        <thead>
+          <tr><th>Document URL</th><th>File Type</th><th>Author</th><th>Software</th><th>Risk Notes</th><th>Severity</th></tr>
+        </thead>
+        <tbody>
+          {% for item in metadata.findings %}
+          <tr>
+            <td class="mono"><a href="{{ item.document_url }}" target="_blank">{{ item.document_url }}</a></td>
+            <td class="mono">{{ item.document_url.rsplit('.', 1)[-1] | upper if '.' in item.document_url else '—' }}</td>
+            <td>{% if item.field_name in ['Author', 'last_modified_by'] %}{{ item.value }}{% else %}—{% endif %}</td>
+            <td>{% if item.field_name in ['Creator', 'Producer'] %}{{ item.value }}{% else %}—{% endif %}</td>
+            <td>{{ item.field_name }} metadata exposed</td>
+            <td>
+              {% if item.severity == 'CRITICAL' or item.severity == 'HIGH' %}<span class="badge red">{{ item.severity }}</span>
+              {% elif item.severity == 'MEDIUM' %}<span class="badge yellow">MEDIUM</span>
+              {% else %}<span class="badge gray">LOW</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% if metadata.unique_authors and metadata.unique_authors|length > 0 %}
+      <div class="info-card">Authors exposed: {{ metadata.unique_authors | join(', ') }}</div>
+      {% endif %}
+      {% if metadata.internal_software and metadata.internal_software|length > 0 %}
+      <div class="info-card">Internal software exposed: {{ metadata.internal_software | join(', ') }}</div>
+      {% endif %}
+      {% else %}
+      <p><span class="badge green">No metadata leaks detected in scanned documents.</span></p>
+      {% endif %}
+      {% endif %}
+    </section>
+
+    <section id="google-dork-recipe" class="card">
+      <h2>Google Dork Recipe</h2>
+      {% if google_dorks.skipped %}
+      <p class="badge yellow">{{ google_dorks.skip_reason }}</p>
+      {% else %}
+      {% for result in dorks %}
+      <details class="card" style="margin:10px 0;">
+        <summary><strong>{{ result.category }}</strong></summary>
+        <pre><code class="mono">{% for q in result.queries %}{{ q }}
+{% endfor %}</code></pre>
+        <p>
+          {% if result.ddg_result == 'RESULTS_FOUND' %}
+            <span class="badge red">Live hits detected on DuckDuckGo</span>
+          {% elif result.ddg_result == 'NO_RESULTS' %}
+            <span class="badge green">No results on DuckDuckGo</span>
+          {% else %}
+            <span class="badge gray">Not checked (query-check disabled, capped by limit, or rate blocked)</span>
+          {% endif %}
+        </p>
+        <p class="muted">Paste this query into Google to manually verify.</p>
+      </details>
+      {% endfor %}
+      <p class="muted italic">These are passive reconnaissance queries only. Results are informational. Always obtain authorization before investigating any target.</p>
+      {% endif %}
+    </section>
+
+    <section id="shodan-recon" class="card">
+      <h2>Shodan Recon</h2>
+      {% if shodan.skipped %}
+      <p class="badge yellow">Shodan scan skipped — {{ shodan.skip_reason }}</p>
+      {% else %}
+      <table>
+        <thead>
+          <tr><th>IP Address</th><th>Org / ISP</th><th>Country</th><th>Open Ports</th><th>CVEs</th><th>Severity</th></tr>
+        </thead>
+        <tbody>
+          {% for host in shodan.hosts %}
+          <tr>
+            <td class="mono">{{ host.ip_str }}</td>
+            <td>{{ host.org or host.isp or '—' }}</td>
+            <td>{{ host.country_name or '—' }}</td>
+            <td class="mono">{{ host.open_ports | join(', ') }}</td>
+            <td class="mono">{{ host.vulns | join(', ') if host.vulns else '—' }}</td>
+            <td>
+              {% if host.overall_severity == 'CRITICAL' or host.overall_severity == 'HIGH' %}<span class="badge red">{{ host.overall_severity }}</span>
+              {% elif host.overall_severity == 'MEDIUM' %}<span class="badge yellow">MEDIUM</span>
+              {% else %}<span class="badge gray">LOW</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% if shodan.unique_cves and shodan.unique_cves|length > 0 %}
+      <p class="badge red">CVE findings detected:</p>
+      <ul>
+        {% for cve in shodan.unique_cves %}
+        <li class="mono"><a href="https://nvd.nist.gov/vuln/detail/{{ cve }}" target="_blank">{{ cve }}</a></li>
+        {% endfor %}
+      </ul>
+      <p class="muted">CVE data sourced from Shodan. Verify severity at NVD before reporting.</p>
+      {% endif %}
+      {% endif %}
+    </section>
 
     <section id="risk-summary" class="card">
       <h2>Risk Summary & Recommendations</h2>
@@ -217,11 +814,19 @@
           <tr>
             <td>{{ finding.id }}</td>
             <td>{{ finding.category }}</td>
-            <td>{{ finding.risk }}</td>
+            <td>
+              {% if finding.risk == 'CRITICAL' or finding.risk == 'HIGH' %}<span class="badge red">{{ finding.risk }}</span>
+              {% elif finding.risk == 'MEDIUM' %}<span class="badge yellow">MEDIUM</span>
+              {% elif finding.risk == 'LOW' %}<span class="badge blue">LOW</span>
+              {% else %}<span class="badge gray">INFO</span>{% endif %}
+            </td>
             <td>{{ finding.score_impact }}</td>
             <td>{{ finding.recommendation }}</td>
           </tr>
           {% endfor %}
+          {% if findings|length == 0 %}
+          <tr><td colspan="5" class="muted">No risk findings generated.</td></tr>
+          {% endif %}
         </tbody>
       </table>
     </section>
@@ -236,6 +841,7 @@
   </main>
 
   <script>
+    {% if credential_leak.engine == 'hibp' and credential_leak.mode == 'free' %}
     const breachRows = {{ credential_leak.breaches | tojson }};
     const rowsPerPage = 10;
     let currentPage = 1;
@@ -297,41 +903,133 @@
       document.getElementById("nextPage").disabled = currentPage >= totalPages;
     }
 
-    document.getElementById("breachSearch").addEventListener("input", () => {
-      currentPage = 1;
-      renderTable();
-    });
-
-    document.getElementById("verifiedFilter").addEventListener("change", () => {
-      currentPage = 1;
-      renderTable();
-    });
-
-    document.getElementById("prevPage").addEventListener("click", () => {
-      currentPage -= 1;
-      renderTable();
-    });
-
-    document.getElementById("nextPage").addEventListener("click", () => {
-      currentPage += 1;
-      renderTable();
-    });
-
-    for (const header of document.querySelectorAll("#breachTable th[data-sort]")) {
-      header.style.cursor = "pointer";
-      header.addEventListener("click", () => {
-        const key = header.dataset.sort;
-        if (currentSortKey === key) {
-          sortDirection *= -1;
-        } else {
-          currentSortKey = key;
-          sortDirection = 1;
-        }
+    if (document.getElementById("breachTable")) {
+      document.getElementById("breachSearch").addEventListener("input", () => {
+        currentPage = 1;
         renderTable();
+      });
+
+      document.getElementById("verifiedFilter").addEventListener("change", () => {
+        currentPage = 1;
+        renderTable();
+      });
+
+      document.getElementById("prevPage").addEventListener("click", () => {
+        currentPage -= 1;
+        renderTable();
+      });
+
+      document.getElementById("nextPage").addEventListener("click", () => {
+        currentPage += 1;
+        renderTable();
+      });
+
+      for (const header of document.querySelectorAll("#breachTable th[data-sort]")) {
+        header.style.cursor = "pointer";
+        header.addEventListener("click", () => {
+          const key = header.dataset.sort;
+          if (currentSortKey === key) {
+            sortDirection *= -1;
+          } else {
+            currentSortKey = key;
+            sortDirection = 1;
+          }
+          renderTable();
+        });
+      }
+      renderTable();
+    }
+    {% endif %}
+
+    {% if credential_leak.engine == 'leakcheck' and credential_leak.leakcheck_found > 0 %}
+    const leakcheckRows = {{ credential_leak.leakcheck_sources | tojson }};
+    const leakRowsPerPage = 50;
+    let leakCurrentPage = 1;
+
+    function leakNormalize(value) {
+      return String(value ?? "").toLowerCase();
+    }
+
+    function leakFilteredRows() {
+      const searchEl = document.getElementById("leakcheckSearch");
+      const q = searchEl ? leakNormalize(searchEl.value) : "";
+      return leakcheckRows.filter((row) => leakNormalize(row.name).includes(q));
+    }
+
+    function leakBadge(sev) {
+      if (sev === "CRITICAL" || sev === "HIGH") return "badge red";
+      if (sev === "MEDIUM") return "badge yellow";
+      if (sev === "LOW") return "badge blue";
+      return "badge gray";
+    }
+
+    function renderLeakTable() {
+      const rows = leakFilteredRows();
+      const tableBody = document.getElementById("leakcheckTableBody");
+      if (!tableBody) return;
+
+      tableBody.innerHTML = "";
+      const total = rows.length;
+      const totalPages = Math.max(1, Math.ceil(total / leakRowsPerPage));
+      leakCurrentPage = Math.min(leakCurrentPage, totalPages);
+
+      const start = (leakCurrentPage - 1) * leakRowsPerPage;
+      const end = Math.min(start + leakRowsPerPage, total);
+      const pageRows = rows.slice(start, end);
+
+      for (const row of pageRows) {
+        const tr = document.createElement("tr");
+        const fields = Array.isArray(row.fields) && row.fields.length > 0 ? row.fields.join(", ") : "—";
+        const passType = row.passwordtype || "unknown";
+        const sev = row.severity || "LOW";
+        tr.innerHTML = `
+          <td>${row.name || "—"}</td>
+          <td>${row.date || "—"}</td>
+          <td class="mono">${passType}</td>
+          <td>${fields}</td>
+          <td><span class="${leakBadge(sev)}">${sev}</span></td>
+        `;
+        tableBody.appendChild(tr);
+      }
+
+      const info = document.getElementById("leakPageInfo");
+      if (info) {
+        const from = total === 0 ? 0 : start + 1;
+        info.textContent = `Showing ${from}–${end} of ${total} sources`;
+      }
+
+      const prev = document.getElementById("leakPrevPage");
+      const next = document.getElementById("leakNextPage");
+      if (prev) prev.disabled = leakCurrentPage <= 1;
+      if (next) next.disabled = leakCurrentPage >= totalPages;
+    }
+
+    const leakSearch = document.getElementById("leakcheckSearch");
+    if (leakSearch) {
+      leakSearch.addEventListener("input", () => {
+        leakCurrentPage = 1;
+        renderLeakTable();
       });
     }
 
-    renderTable();
+    const leakPrev = document.getElementById("leakPrevPage");
+    if (leakPrev) {
+      leakPrev.addEventListener("click", () => {
+        leakCurrentPage -= 1;
+        renderLeakTable();
+      });
+    }
+
+    const leakNext = document.getElementById("leakNextPage");
+    if (leakNext) {
+      leakNext.addEventListener("click", () => {
+        leakCurrentPage += 1;
+        renderLeakTable();
+      });
+    }
+
+    renderLeakTable();
+    {% endif %}
   </script>
 </body>
 </html>

@@ -36,6 +36,7 @@ async def generate(context: ReportContext) -> Path:
         "dns_email_auth": context.dns_email_auth.model_dump(mode="json"),
         "metadata_extractor": context.metadata_extractor.model_dump(mode="json"),
         "google_dorks": context.google_dorks.model_dump(mode="json"),
+        "shodan": context.shodan.model_dump(mode="json"),
         "findings": [item.model_dump(mode="json") for item in context.exposure_score.findings],
     }
 

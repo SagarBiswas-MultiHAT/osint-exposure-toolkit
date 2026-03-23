@@ -23,7 +23,9 @@ class APIKeysConfig(BaseModel):
     """API key configuration."""
 
     hibp: str = ""
+    leakcheck: str = ""
     github: str = ""
+    shodan: str = ""
 
 
 class ModulesConfig(BaseModel):
@@ -38,6 +40,7 @@ class ModulesConfig(BaseModel):
     google_dorks: bool = True
     js_secret_scanner: bool = True
     dns_email_auth: bool = True
+    shodan_recon: bool = True
     exposure_graph: bool = True
 
 
@@ -45,7 +48,10 @@ class RateLimitsConfig(BaseModel):
     """Per-source rate limiting values."""
 
     hibp_delay: float = 1.5
+    leakcheck_auth_delay: float = 1.0
+    leakcheck_public_delay: float = 2.0
     github_delay: float = 1.0
+    shodan_delay: float = 1.0
     social_check_delay: float = 0.5
     ddg_delay: float = 5.0
     dns_concurrent: int = 5
@@ -61,6 +67,7 @@ class ScanLimitsConfig(BaseModel):
     max_docs_to_fetch: int = 5
     max_social_platforms: int = 15
     max_dork_live_checks: int = 3
+    max_shodan_ips: int = 5
 
 
 class AppConfig(BaseModel):

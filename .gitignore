@@ -33,3 +33,4 @@ nosetests.xml
 *.log
 .DS_Store
 .ipynb_checkpoints/
+.config.yaml

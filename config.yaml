@@ -7,7 +7,9 @@ general:
 
 api_keys:
   hibp: ""
+  leakcheck: ""
   github: ""
+  shodan: ""
 
 modules:
   credential_leak: true
@@ -19,11 +21,15 @@ modules:
   google_dorks: true
   js_secret_scanner: true
   dns_email_auth: true
+  shodan_recon: true
   exposure_graph: true
 
 rate_limits:
   hibp_delay: 1.5
+  leakcheck_auth_delay: 1.0
+  leakcheck_public_delay: 2.0
   github_delay: 1.0
+  shodan_delay: 1.0
   social_check_delay: 0.5
   ddg_delay: 5.0
   dns_concurrent: 5
@@ -36,3 +42,4 @@ scan_limits:
   max_docs_to_fetch: 5
   max_social_platforms: 15
   max_dork_live_checks: 3
+  max_shodan_ips: 5

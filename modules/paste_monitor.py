@@ -8,6 +8,18 @@ from core.models import CredentialLeakResult, HIBPMode, PasteResult
 def run(credential_result: CredentialLeakResult) -> PasteResult:
     """Build paste exposure result from credential leak module output only."""
 
+    if credential_result.engine == "leakcheck":
+        return PasteResult(
+            mode="leakcheck",
+            total_pastes=0,
+            pastes=[],
+            message=(
+                "Paste lookup is not available in LeakCheck mode. Re-run with --use-hibp "
+                "and Premium mode for paste site results."
+            ),
+            score_impact=0,
+        )
+
     is_premium_mode = credential_result.mode in {HIBPMode.LIVE, HIBPMode.DEMO}
     if not is_premium_mode:
         return PasteResult(

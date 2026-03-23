@@ -161,7 +161,7 @@ async def run(
         LOGGER.warning("GitHub scan skipped — no API key configured. Add a free PAT to config.yaml.")
         return GitHubFootprintResult(
             skipped=True,
-            skip_reason="GitHub scan skipped — no API key configured.",
+            skip_reason="GitHub scan skipped — no API key configured. Add a free PAT to config.yaml.",
             score_impact=0,
         )
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import logging
+import re
 
 import aiohttp
 
@@ -20,14 +21,51 @@ def _username_variants(email: str) -> list[str]:
     """Generate username variants from local part."""
 
     local_part = email.split("@", maxsplit=1)[0].strip().lower()
-    normalized = local_part.replace(".", "")
-    variants = [normalized, local_part, local_part.replace(".", "_"), local_part.replace(".", "-")]
+    normalized = re.sub(r"[^a-z0-9]", "", local_part)
+    dotted = local_part.replace("_", ".").replace("-", ".")
+    tokens = [token for token in dotted.split(".") if token]
+
+    variants = [
+        normalized,
+        local_part,
+        local_part.replace(".", "_"),
+        local_part.replace(".", "-"),
+        local_part.replace("_", ""),
+        local_part.replace("-", ""),
+    ]
+
+    if len(tokens) >= 2:
+        variants.extend(
+            [
+                "".join(tokens),
+                f"{tokens[0]}{tokens[-1]}",
+                "_".join(tokens),
+                "-".join(tokens),
+            ]
+        )
 
     ordered: list[str] = []
     for candidate in variants:
         if candidate and candidate not in ordered:
             ordered.append(candidate)
-    return ordered[:4]
+    return ordered[:10]
+
+
+def _status_from_http(status_code: int, url: str) -> PlatformStatus:
+    """Map HTTP status code to social profile status (hybrid policy)."""
+
+    if status_code == 200:
+        return PlatformStatus.EXPOSED
+    if status_code == 404:
+        return PlatformStatus.NOT_FOUND
+    if status_code == 999:
+        LOGGER.info("LinkedIn returned HTTP 999 for %s; marking UNKNOWN.", url)
+        return PlatformStatus.UNKNOWN
+    if status_code in {401, 403, 429}:
+        return PlatformStatus.EXPOSED
+    if status_code >= 500:
+        return PlatformStatus.UNKNOWN
+    return PlatformStatus.UNKNOWN
 
 
 async def _check_url(
@@ -43,25 +81,11 @@ async def _check_url(
         await limiter.acquire()
         try:
             async with session.head(url, timeout=5, headers=headers, allow_redirects=True) as response:
-                if response.status == 200:
-                    return PlatformStatus.EXPOSED
-                if response.status == 404:
-                    return PlatformStatus.NOT_FOUND
-                if response.status == 999:
-                    LOGGER.info("LinkedIn returned HTTP 999 for %s; marking UNKNOWN.", url)
-                    return PlatformStatus.UNKNOWN
-                return PlatformStatus.UNKNOWN
+                return _status_from_http(response.status, url)
         except (aiohttp.ClientError, TimeoutError):
             try:
                 async with session.get(url, timeout=5, headers=headers, allow_redirects=True) as response:
-                    if response.status == 200:
-                        return PlatformStatus.EXPOSED
-                    if response.status == 404:
-                        return PlatformStatus.NOT_FOUND
-                    if response.status == 999:
-                        LOGGER.info("LinkedIn returned HTTP 999 for %s; marking UNKNOWN.", url)
-                        return PlatformStatus.UNKNOWN
-                    return PlatformStatus.UNKNOWN
+                    return _status_from_http(response.status, url)
             except (aiohttp.ClientError, TimeoutError):
                 return PlatformStatus.UNKNOWN
 
@@ -91,19 +115,30 @@ async def run(
         selected_variant = variants[0] if variants else None
         url = template.format(username=selected_variant)
         status = await _check_url(session, semaphore, limiter, url)
-        positive = platform_name in POSITIVE_SIGNAL_PLATFORMS and status == PlatformStatus.EXPOSED
+        status_rank = {
+            PlatformStatus.EXPOSED: 3,
+            PlatformStatus.UNKNOWN: 2,
+            PlatformStatus.NOT_FOUND: 1,
+        }
 
-        if platform_name not in POSITIVE_SIGNAL_PLATFORMS:
-            for variant in variants[1:]:
-                if status == PlatformStatus.EXPOSED:
-                    break
-                candidate_url = template.format(username=variant)
-                candidate_status = await _check_url(session, semaphore, limiter, candidate_url)
-                if candidate_status == PlatformStatus.EXPOSED:
-                    url = candidate_url
-                    selected_variant = variant
-                    status = candidate_status
-                    break
+        best_variant = selected_variant
+        best_url = url
+        best_status = status
+
+        for variant in variants[1:]:
+            if best_status == PlatformStatus.EXPOSED:
+                break
+            candidate_url = template.format(username=variant)
+            candidate_status = await _check_url(session, semaphore, limiter, candidate_url)
+            if status_rank[candidate_status] > status_rank[best_status]:
+                best_variant = variant
+                best_url = candidate_url
+                best_status = candidate_status
+
+        selected_variant = best_variant
+        url = best_url
+        status = best_status
+        positive = platform_name in POSITIVE_SIGNAL_PLATFORMS and status == PlatformStatus.EXPOSED
 
         profiles.append(
             SocialProfileEntry(

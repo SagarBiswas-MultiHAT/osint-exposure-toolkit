@@ -28,10 +28,12 @@ from core.models import (
     MetadataResult,
     PasteResult,
     ReportContext,
+    ShodanReconResult,
     SocialFootprintResult,
 )
 from graph.exposure_graph import generate as generate_graph
 from modules.credential_leak import run as run_credential_leak
+from modules.credential_leak import select_engine_choice
 from modules.dns_email_auth import run as run_dns_email_auth
 from modules.email_intel import run as run_email_intel
 from modules.exposure_scorer import run as run_exposure_scorer
@@ -40,6 +42,7 @@ from modules.google_dorks import run as run_google_dorks
 from modules.js_secret_scanner import run as run_js_secret_scanner
 from modules.metadata_extractor import run as run_metadata_extractor
 from modules.paste_monitor import run as run_paste_monitor
+from modules.shodan_recon import run as run_shodan_recon
 from modules.social_footprint import run as run_social_footprint
 from reporting.html_report import generate as generate_html_report
 from reporting.json_report import generate as generate_json_report
@@ -57,6 +60,7 @@ MODULE_ALIASES: dict[str, str] = {
     "dns": "dns_email_auth",
     "metadata": "metadata_extractor",
     "dorks": "google_dorks",
+    "shodan": "shodan_recon",
 }
 
 
@@ -112,6 +116,37 @@ def _select_hibp_mode(email: str | None, free_hibp: bool, demo_mode: bool) -> HI
     return HIBPMode.FREE
 
 
+def _select_credential_engine(
+    email: str | None,
+    use_hibp: bool,
+    free_hibp: bool,
+    demo_mode: bool,
+) -> str:
+    """Select credential leak engine with LeakCheck as default."""
+
+    if free_hibp or demo_mode or use_hibp:
+        return "hibp"
+    if not email:
+        return "leakcheck"
+
+    CONSOLE.print("[cyan]Select credential leak engine:[/cyan]")
+    CONSOLE.print("  [1] LeakCheck  (default) — Per-email breach lookup. API key optional.")
+    CONSOLE.print("  [2] HIBP       — Free / Premium / Demo modes available.")
+
+    first = Prompt.ask(
+        "Press Enter or type 1 to use LeakCheck, type 2 for HIBP",
+        default="1",
+    )
+    engine = select_engine_choice(first)
+    if first.strip().lower() not in {"", "1", "2", "hibp", "leakcheck"}:
+        second = Prompt.ask(
+            "Invalid choice. Enter 1 for LeakCheck or 2 for HIBP",
+            default="1",
+        )
+        engine = select_engine_choice(second)
+    return engine
+
+
 def _is_module_enabled(config: AppConfig, module_key: str, selected_modules: set[str]) -> bool:
     """Evaluate module enablement from config and CLI filters."""
 
@@ -136,6 +171,8 @@ def _is_module_enabled(config: AppConfig, module_key: str, selected_modules: set
         return config.modules.metadata_extractor
     if module_key == "google_dorks":
         return config.modules.google_dorks
+    if module_key == "shodan_recon":
+        return config.modules.shodan_recon
     return True
 
 
@@ -149,11 +186,16 @@ def _module_summary_rows(
     dns_email_auth: EmailAuthResult,
     metadata_extractor: MetadataResult,
     google_dorks: GoogleDorksResult,
+    shodan_recon: ShodanReconResult,
 ) -> list[tuple[str, int, str, int]]:
     """Build summary rows for Rich completion table."""
 
+    credential_findings = (
+        credential_leak.leakcheck_found if credential_leak.engine == "leakcheck" else credential_leak.total_breaches
+    )
+
     return [
-        ("credential_leak", credential_leak.total_breaches, str(credential_leak.overall_severity), credential_leak.score_impact),
+        ("credential_leak", credential_findings, str(credential_leak.overall_severity), credential_leak.score_impact),
         ("github_footprint", len(github_footprint.secrets_found), str(github_footprint.overall_severity), github_footprint.score_impact),
         ("email_intel", 1 if email_intel.format_valid else 0, "INFO", email_intel.score_impact),
         ("social_footprint", social_footprint.total_exposure_count, "INFO", social_footprint.score_impact),
@@ -162,12 +204,14 @@ def _module_summary_rows(
         ("dns_email_auth", dns_email_auth.spoofability_score, "INFO", dns_email_auth.score_impact),
         ("metadata_extractor", len(metadata_extractor.findings), "INFO", metadata_extractor.score_impact),
         ("google_dorks", len(google_dorks.results), "INFO", google_dorks.score_impact),
+        ("shodan_recon", shodan_recon.total_open_ports, shodan_recon.overall_severity, shodan_recon.score_impact),
     ]
 
 
 async def _run(
     email: str | None,
     domain: str | None,
+    use_hibp: bool,
     free_hibp: bool,
     demo_mode: bool,
     skip_pastes: bool,
@@ -193,14 +237,19 @@ async def _run(
     output_dir = Path(config.general.output_dir) / f"target_{timestamp}"
     logger = setup_logger(config.general.log_level, str(output_dir))
 
-    hibp_mode = _select_hibp_mode(email, free_hibp, demo_mode)
+    engine = _select_credential_engine(email, use_hibp, free_hibp, demo_mode)
+    hibp_mode = _select_hibp_mode(email, free_hibp, demo_mode) if engine == "hibp" else HIBPMode.FREE
     if not email:
-        logger.info("No email provided — HIBP defaulting to Free mode (breach landscape only).")
+        logger.info("No email provided — credential scan limited to domain pastes.")
+    if engine == "leakcheck":
+        logger.info("Credential engine: LeakCheck")
+    else:
+        logger.info("Credential engine: HIBP (%s)", hibp_mode.value)
 
     timeout = aiohttp.ClientTimeout(total=config.general.request_timeout)
     semaphore = asyncio.Semaphore(config.general.max_concurrent_requests)
 
-    credential_leak = CredentialLeakResult(mode=HIBPMode.FREE)
+    credential_leak = CredentialLeakResult(mode=HIBPMode.FREE, engine=engine)
     paste_monitor = PasteResult(mode="free", score_impact=0)
     github_footprint = GitHubFootprintResult(skipped=True, skip_reason="Not selected")
     email_intel = EmailIntelResult(skipped=True, skip_reason="Not selected")
@@ -209,11 +258,19 @@ async def _run(
     js_secret_scanner = JSSecretResult(skipped=True, skip_reason="Not selected")
     metadata_extractor = MetadataResult(skipped=True, skip_reason="Not selected")
     google_dorks = GoogleDorksResult(skipped=True, skip_reason="Not selected")
+    shodan_recon = ShodanReconResult(skipped=True, skip_reason="Not selected")
 
     async with aiohttp.ClientSession(timeout=timeout, headers={"User-Agent": USER_AGENT}) as session:
         if _is_module_enabled(config, "credential_leak", selected_modules):
             try:
-                credential_leak = await run_credential_leak(session, semaphore, config, email, hibp_mode)
+                credential_leak = await run_credential_leak(
+                    session,
+                    semaphore,
+                    config,
+                    email,
+                    hibp_mode,
+                    engine=engine,
+                )
             except Exception:
                 logger.exception("credential_leak failed")
 
@@ -247,8 +304,17 @@ async def _run(
                 logger.exception("dns_email_auth failed")
                 return EmailAuthResult(skipped=True, skip_reason="Execution error")
 
-        github_footprint, email_intel, dns_email_auth = await asyncio.gather(
-            run_github(), run_email(), run_dns()
+        async def run_shodan() -> ShodanReconResult:
+            if not _is_module_enabled(config, "shodan_recon", selected_modules):
+                return ShodanReconResult(skipped=True, skip_reason="Not selected")
+            try:
+                return await run_shodan_recon(session, semaphore, config, domain)
+            except Exception:
+                logger.exception("shodan_recon failed")
+                return ShodanReconResult(skipped=True, skip_reason="Execution error")
+
+        github_footprint, email_intel, dns_email_auth, shodan_recon = await asyncio.gather(
+            run_github(), run_email(), run_dns(), run_shodan()
         )
 
         async def run_social() -> SocialFootprintResult:
@@ -301,6 +367,7 @@ async def _run(
             dns_email_auth=dns_email_auth,
             metadata_extractor=metadata_extractor,
             google_dorks=google_dorks,
+            shodan_recon=shodan_recon,
         )
 
         context = ReportContext(
@@ -319,6 +386,7 @@ async def _run(
             dns_email_auth=dns_email_auth,
             metadata_extractor=metadata_extractor,
             google_dorks=google_dorks,
+            shodan=shodan_recon,
             exposure_score=score_result,
         )
 
@@ -352,6 +420,7 @@ async def _run(
         dns_email_auth,
         metadata_extractor,
         google_dorks,
+        shodan_recon,
     ):
         summary.add_row(module_name, str(count), severity, str(score_impact))
 
@@ -372,6 +441,7 @@ async def _run(
 @click.command()
 @click.option("--email", type=str, default=None, help="Email to investigate")
 @click.option("--domain", type=str, default=None, help="Domain to investigate")
+@click.option("--use-hibp", is_flag=True, help="Use HIBP engine instead of default LeakCheck")
 @click.option("--free-hibp", is_flag=True, help="Skip prompt and force Free HIBP mode")
 @click.option("--demo-mode", is_flag=True, help="Skip prompt and force Demo mode")
 @click.option("--skip-pastes", is_flag=True, help="Skip paste monitor module")
@@ -382,6 +452,7 @@ async def _run(
 def main(
     email: str | None,
     domain: str | None,
+    use_hibp: bool,
     free_hibp: bool,
     demo_mode: bool,
     skip_pastes: bool,
@@ -394,12 +465,17 @@ def main(
 
     if not email and not domain:
         raise click.UsageError("At least one of --email or --domain is required.")
+    if use_hibp and (free_hibp or demo_mode):
+        raise click.UsageError(
+            "--use-hibp is redundant when --free-hibp or --demo-mode is set. Use only one HIBP flag."
+        )
 
     _banner()
     asyncio.run(
         _run(
             email=email,
             domain=domain,
+            use_hibp=use_hibp,
             free_hibp=free_hibp,
             demo_mode=demo_mode,
             skip_pastes=skip_pastes,

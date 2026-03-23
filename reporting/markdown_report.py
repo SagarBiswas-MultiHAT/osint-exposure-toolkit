@@ -28,7 +28,18 @@ async def generate(context: ReportContext) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
     output_file = output_dir / "report.md"
 
-    mode_label = "Demo" if context.credential_leak.demo_mode else str(context.credential_leak.mode).title()
+    if context.credential_leak.engine == "leakcheck":
+        leak_mode = (context.credential_leak.leakcheck_mode or "public").title()
+        credential_engine_label = f"LeakCheck ({leak_mode})"
+    else:
+        hibp_mode = str(context.credential_leak.mode or "free").title()
+        credential_engine_label = f"HIBP ({hibp_mode})"
+
+    shodan_open_ports = (
+        "N/A (no domain provided)"
+        if context.shodan.skipped
+        else _fmt_num(context.shodan.total_open_ports)
+    )
 
     lines: list[str] = [
         "# Digital Exposure Report",
@@ -36,30 +47,61 @@ async def generate(context: ReportContext) -> Path:
         f"**Target:** {context.target_email or 'N/A'} / {context.target_domain or 'N/A'}",
         f"**Date:** {context.generated_at.strftime('%Y-%m-%d %H:%M UTC')}",
         f"**Tool:** {context.tool_name} v{context.tool_version}",
-        f"**Mode:** {mode_label}",
+        f"**Credential Engine:** {credential_engine_label}",
         "",
         "## Executive Summary",
         "",
         f"- **Exposure Score:** {context.exposure_score.score} / 100 — {context.exposure_score.label}",
-        f"- **Credential Breaches:** {_fmt_num(context.credential_leak.total_breaches)}",
+        (
+            f"- **Credential Leaks:** {_fmt_num(context.credential_leak.leakcheck_found)}"
+            if context.credential_leak.engine == "leakcheck"
+            else f"- **Credential Leaks:** {_fmt_num(context.credential_leak.total_breaches)}"
+        ),
         f"- **GitHub Secrets:** {_fmt_num(len(context.github_footprint.secrets_found))}",
         f"- **Social Profiles Exposed:** {_fmt_num(context.social_footprint.total_exposure_count)}",
         f"- **Email Spoofability:** {context.dns_email_auth.spoofability_score} / 10",
+        f"- **Shodan Open Ports:** {shodan_open_ports}",
         "",
         "## Credential Leaks",
         "",
-        "| Breach Name | Date | Records | Data Classes | Severity |",
-        "|---|---|---:|---|---|",
     ]
 
-    for breach in context.credential_leak.breaches:
-        data_classes = ", ".join(breach.data_classes)
+    if context.credential_leak.engine == "leakcheck":
+        if context.credential_leak.leakcheck_found > 0:
+            lines.extend(
+                [
+                    "| Source | Date | Password Type | Fields | Severity |",
+                    "|---|---|---|---|---|",
+                ]
+            )
+            for source in context.credential_leak.leakcheck_sources:
+                name = str(source.get("name") or "—")
+                date = str(source.get("date") or "—")
+                password_type = str(source.get("passwordtype") or "unknown")
+                fields = source.get("fields") or []
+                field_text = ", ".join(str(item) for item in fields) if fields else "—"
+                severity = str(source.get("severity") or "LOW")
+                lines.append(f"| {name} | {date} | {password_type} | {field_text} | {severity} |")
+        else:
+            lines.append("No breach sources found.")
+    elif str(context.credential_leak.mode or "").lower() == "free":
         lines.append(
-            f"| {breach.name} | {breach.breach_date} | {_fmt_num(breach.pwn_count)} | {data_classes} | {breach.severity} |"
+            "> No individual check in Free mode. Switch to Premium HIBP mode for per-email breach lookup."
         )
-
-    if not context.credential_leak.breaches:
-        lines.append("| — | — | — | — | — |")
+    else:
+        lines.extend(
+            [
+                "| Breach Name | Date | Records | Data Classes | Severity |",
+                "|---|---|---:|---|---|",
+            ]
+        )
+        for breach in context.credential_leak.breaches:
+            data_classes = ", ".join(breach.data_classes)
+            lines.append(
+                f"| {breach.name} | {breach.breach_date} | {_fmt_num(breach.pwn_count)} | {data_classes} | {breach.severity} |"
+            )
+        if not context.credential_leak.breaches:
+            lines.append("| — | — | — | — | — |")
 
     lines.extend(
         [
@@ -106,11 +148,6 @@ async def generate(context: ReportContext) -> Path:
             "",
             "## Email Authentication",
             "",
-            _kv_row("SPF Present", str(context.dns_email_auth.spf.present)),
-            _kv_row("DMARC Present", str(context.dns_email_auth.dmarc.present)),
-            _kv_row("DKIM Selectors", str(len(context.dns_email_auth.dkim.selectors_found))),
-            _kv_row("MTA-STS", str(context.dns_email_auth.mta_sts.present)),
-            _kv_row("Spoofability", f"{context.dns_email_auth.spoofability_score} / 10"),
             "",
             "## Document Metadata",
             "",
@@ -122,12 +159,57 @@ async def generate(context: ReportContext) -> Path:
         ]
     )
 
+    email_auth_insert_at = lines.index("## Document Metadata")
+    email_auth_lines: list[str] = []
+    if context.dns_email_auth.skipped:
+        email_auth_lines.extend(
+            [
+                f"> Skipped — {context.dns_email_auth.skip_reason or 'No domain provided.'}",
+                "",
+            ]
+        )
+    else:
+        email_auth_lines.extend(
+            [
+                _kv_row("SPF Present", str(context.dns_email_auth.spf.present)),
+                _kv_row("DMARC Present", str(context.dns_email_auth.dmarc.present)),
+                _kv_row("DKIM Selectors", str(len(context.dns_email_auth.dkim.selectors_found))),
+                _kv_row("MTA-STS", str(context.dns_email_auth.mta_sts.present)),
+                _kv_row("Spoofability", f"{context.dns_email_auth.spoofability_score} / 10"),
+                "",
+            ]
+        )
+    lines[email_auth_insert_at:email_auth_insert_at] = email_auth_lines
+
     for dork in context.google_dorks.results:
         lines.append(f"### {dork.category}")
         lines.append("")
         lines.append("```text")
         lines.extend(dork.queries)
         lines.append("```")
+        lines.append("")
+
+    lines.extend(["## Shodan Recon", ""])
+    if context.shodan.skipped:
+        lines.append(f"> {context.shodan.skip_reason or 'Shodan scan skipped.'}")
+        lines.append("")
+    else:
+        lines.append(
+            f"Shodan found {context.shodan.total_open_ports} open ports across {len(context.shodan.hosts)} IPs."
+        )
+        lines.append("")
+        lines.append("| IP | Ports | CVEs | Severity |")
+        lines.append("|---|---|---|---|")
+        for host in context.shodan.hosts:
+            lines.append(
+                f"| {host.ip_str} | {', '.join(str(port) for port in host.open_ports) or '—'} | "
+                f"{', '.join(host.vulns) or '—'} | {host.overall_severity} |"
+            )
+        if context.shodan.unique_cves:
+            lines.append("")
+            lines.append("**CVEs**")
+            for cve in context.shodan.unique_cves:
+                lines.append(f"- [{cve}](https://nvd.nist.gov/vuln/detail/{cve})")
         lines.append("")
 
     lines.extend(

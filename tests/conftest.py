@@ -29,6 +29,7 @@ from core.models import (
     MetadataResult,
     PasteResult,
     ReportContext,
+    ShodanReconResult,
     SocialFootprintResult,
 )
 
@@ -61,6 +62,88 @@ def hibp_fixture_data() -> dict:
 
 
 @pytest.fixture
+def leakcheck_auth_fixture() -> dict:
+    """Mock authenticated LeakCheck payload."""
+
+    return {
+        "success": True,
+        "found": 2,
+        "sources": [
+            {
+                "name": "AuthBreachCritical",
+                "date": "2020-01",
+                "unverified": False,
+                "passwordtype": "plaintext",
+                "fields": ["email", "password"],
+            },
+            {
+                "name": "AuthBreachMedium",
+                "date": "2021-06",
+                "unverified": False,
+                "passwordtype": "unknown",
+                "fields": ["email", "phone"],
+            },
+        ],
+    }
+
+
+@pytest.fixture
+def leakcheck_public_fixture() -> dict:
+    """Mock public LeakCheck payload."""
+
+    return {
+        "success": True,
+        "found": 1,
+        "sources": ["PublicLeakBreach"],
+    }
+
+
+@pytest.fixture
+def shodan_host_fixture() -> dict:
+    """Mock Shodan host payload with mixed-risk services and one CVE."""
+
+    return {
+        "ip_str": "1.2.3.4",
+        "hostnames": ["edge.example.com"],
+        "org": "Example Org",
+        "country_name": "United States",
+        "isp": "Example ISP",
+        "last_update": "2026-01-01T00:00:00.000000",
+        "tags": ["cloud"],
+        "vulns": {"CVE-2021-44228": {}},
+        "data": [
+            {
+                "port": 80,
+                "transport": "tcp",
+                "product": "nginx",
+                "version": "1.24.0",
+                "data": "HTTP banner",
+                "http": {"title": "Welcome"},
+                "cpe": ["cpe:/a:nginx:nginx:1.24.0"],
+            },
+            {
+                "port": 443,
+                "transport": "tcp",
+                "product": "nginx",
+                "version": "1.24.0",
+                "data": "HTTPS banner",
+                "http": {"title": "Secure"},
+                "ssl": {"cert": {"subject": {"CN": "example.com"}, "issuer": {"CN": "Example CA"}}},
+                "cpe": [],
+            },
+            {
+                "port": 3306,
+                "transport": "tcp",
+                "product": "MySQL",
+                "version": "8.0",
+                "data": "MySQL banner",
+                "cpe": ["cpe:/a:mysql:mysql:8.0"],
+            },
+        ],
+    }
+
+
+@pytest.fixture
 def mock_aiohttp_session() -> MagicMock:
     """Return a mock aiohttp session object with async methods."""
 
@@ -90,5 +173,6 @@ def mock_all_results(tmp_path: Path) -> ReportContext:
         dns_email_auth=EmailAuthResult(domain="example.com"),
         metadata_extractor=MetadataResult(domain="example.com"),
         google_dorks=GoogleDorksResult(),
+        shodan=ShodanReconResult(target_domain="example.com"),
         exposure_score=ExposureScoreResult(),
     )

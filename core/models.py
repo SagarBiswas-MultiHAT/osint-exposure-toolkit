@@ -6,7 +6,7 @@ from datetime import datetime
 from enum import StrEnum
 from pathlib import Path
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class RiskSeverity(StrEnum):
@@ -91,10 +91,14 @@ class CredentialLeakResult(BaseModel):
     model_config = ConfigDict(use_enum_values=True)
 
     email: str | None = None
-    mode: HIBPMode
+    engine: str = "hibp"
+    mode: str | None = None
+    leakcheck_mode: str | None = None
+    leakcheck_sources: list[dict[str, object]] = Field(default_factory=list)
+    leakcheck_found: int = 0
     skipped: bool = False
     demo_mode: bool = False
-    hibp_source: str = "api"
+    hibp_source: str | None = None
     total_breaches: int = 0
     total_pastes: int = 0
     total_pwned_accounts: int = 0
@@ -326,6 +330,65 @@ class MetadataResult(BaseModel):
     score_impact: int = 0
 
 
+class ShodanService(BaseModel):
+    """Per-service details parsed from Shodan host data."""
+
+    port: int
+    transport: str
+    product: str | None = None
+    version: str | None = None
+    banner_excerpt: str | None = None
+    cpe: list[str] = Field(default_factory=list)
+    ssl_subject: str | None = None
+    http_title: str | None = None
+    severity: str = "LOW"
+
+    @field_validator("banner_excerpt")
+    @classmethod
+    def truncate_banner(cls, value: str | None) -> str | None:
+        """Cap stored banner excerpts to 200 characters."""
+
+        if not value:
+            return value
+        return value[:200]
+
+
+class ShodanHostResult(BaseModel):
+    """Shodan host-level result for a resolved IP."""
+
+    ip_str: str
+    hostnames: list[str] = Field(default_factory=list)
+    org: str | None = None
+    country_name: str | None = None
+    isp: str | None = None
+    last_update: str | None = None
+    open_ports: list[int] = Field(default_factory=list)
+    services: list[ShodanService] = Field(default_factory=list)
+    vulns: list[str] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
+    overall_severity: str = "LOW"
+
+
+class ShodanReconResult(BaseModel):
+    """Module 11 output."""
+
+    model_config = ConfigDict(use_enum_values=True)
+
+    skipped: bool = False
+    skip_reason: str | None = None
+    target_domain: str | None = None
+    resolved_ips: list[str] = Field(default_factory=list)
+    hosts: list[ShodanHostResult] = Field(default_factory=list)
+    total_open_ports: int = 0
+    total_cves: int = 0
+    unique_cves: list[str] = Field(default_factory=list)
+    critical_findings: int = 0
+    high_findings: int = 0
+    medium_findings: int = 0
+    overall_severity: str = "LOW"
+    score_impact: int = 0
+
+
 class FindingItem(BaseModel):
     """Normalized finding item emitted by the scorer."""
 
@@ -370,4 +433,5 @@ class ReportContext(BaseModel):
     dns_email_auth: EmailAuthResult
     metadata_extractor: MetadataResult
     google_dorks: GoogleDorksResult
+    shodan: ShodanReconResult
     exposure_score: ExposureScoreResult

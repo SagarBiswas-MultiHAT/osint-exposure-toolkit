@@ -27,6 +27,7 @@ async def test_html_report_smoke(mock_all_results) -> None:
         "Email Authentication",
         "Document Metadata",
         "Google Dork Recipe",
+        "Shodan Recon",
         "Risk Summary & Recommendations",
         "Appendix",
     ]:
@@ -63,3 +64,7 @@ async def test_exposure_graph_smoke(mock_all_results) -> None:
 
     content = output_file.read_text(encoding="utf-8").lower()
     assert "<html" in content
+    assert "exposuredetailpanel" in content
+    assert "copynodesummary" in content
+    assert "copynodeurl" in content
+    assert "network.on(\"click\"" in content

@@ -13,6 +13,28 @@ USER_AGENT: str = (
     "+https://github.com/sagarbiswas-multihat)"
 )
 
+LEAKCHECK_AUTH_URL: str = "https://leakcheck.io/api/v2/query/{email}"
+LEAKCHECK_PUBLIC_URL: str = "https://leakcheck.io/api/public?check={email}"
+
+LEAKCHECK_PASSWORD_TYPES_CRITICAL: list[str] = [
+    "plaintext",
+    "password",
+    "hash",
+    "bcrypt",
+    "md5",
+    "sha1",
+    "sha256",
+]
+
+LEAKCHECK_SEVERITY_FIELDS: dict[str, str] = {
+    "password": "CRITICAL",
+    "password_hint": "HIGH",
+    "security_question": "HIGH",
+    "phone": "MEDIUM",
+    "address": "MEDIUM",
+    "dob": "MEDIUM",
+}
+
 SECRET_PATTERNS: dict[str, str] = {
     "AWS Access Key": r"AKIA[0-9A-Z]{16}",
     "AWS Secret Access Key": r"(?i)aws(.{0,20})?(secret|access)?.{0,20}[=:]\s*['\"]([A-Za-z0-9/+=]{40})['\"]",
@@ -136,29 +158,56 @@ MAIL_PROVIDERS: dict[str, str] = {
 }
 
 DORK_TEMPLATES: dict[str, list[str]] = {
-    "File Exposure": [
-        "site:{domain} (ext:pdf OR ext:doc OR ext:xls OR ext:csv)",
-        "site:{domain} filetype:pdf (\"confidential\" OR \"internal use\")",
+    "Credential & Token Exposure": [
+        "site:pastebin.com \"{email}\"",
+        "site:github.com \"{email}\" (password OR \"api key\" OR token)",
+        "site:github.com \"{domain}\" (password OR secret OR api_key OR access_token)",
+        "site:gitlab.com \"{domain}\" (password OR secret OR token)",
+        "site:stackoverflow.com \"{email}\" \"api key\"",
     ],
-    "Admin and Login Panels": [
+    "Exposed Configs & Env Files": [
+        "site:{domain} (filetype:env OR inurl:.env)",
+        "site:{domain} (filetype:yaml OR filetype:yml) (password OR token OR secret)",
+        "site:{domain} (filetype:json OR filetype:ini) (apikey OR auth OR credential)",
+        "site:github.com \"{domain}\" filename:.env",
+        "site:github.com \"{domain}\" (filename:config.yml OR filename:settings.py) (secret OR token)",
+    ],
+    "Backups & Archives": [
+        "site:{domain} (ext:bak OR ext:old OR ext:backup OR ext:tmp)",
+        "site:{domain} (ext:zip OR ext:tar OR ext:gz OR ext:7z) (backup OR database)",
+        "site:{domain} intitle:\"index of\" (backup OR dump OR archive)",
+        "site:{domain} (inurl:backup OR inurl:backups OR inurl:dump)",
+    ],
+    "Cloud Storage & Buckets": [
+        "site:s3.amazonaws.com \"{domain}\"",
+        "site:s3.amazonaws.com \"{email}\"",
+        "site:blob.core.windows.net \"{domain}\"",
+        "site:storage.googleapis.com \"{domain}\"",
+        "site:digitaloceanspaces.com \"{domain}\"",
+    ],
+    "Admin & Management Surfaces": [
         "site:{domain} (inurl:admin OR inurl:login OR inurl:dashboard)",
         "site:{domain} (inurl:wp-admin OR inurl:phpmyadmin OR inurl:cpanel)",
+        "site:{domain} (inurl:jenkins OR inurl:grafana OR inurl:kibana)",
+        "site:{domain} (inurl:swagger OR inurl:api-docs OR inurl:redoc)",
     ],
-    "Credential Exposure": [
-        "site:pastebin.com \"{email}\"",
-        "site:github.com \"{domain}\" (password OR secret OR api_key)",
-    ],
-    "Error and Debug Exposure": [
+    "Error, Debug & Log Leakage": [
         "site:{domain} (\"SQL syntax\" OR \"stack trace\" OR \"Traceback\")",
-        "site:{domain} \"Index of /\" (inurl:backup OR inurl:logs)",
+        "site:{domain} (\"Exception\" OR \"Unhandled\" OR \"Fatal error\")",
+        "site:{domain} \"Index of /\" (inurl:logs OR inurl:debug)",
+        "site:{domain} (filetype:log OR filetype:txt) (error OR exception OR warning)",
     ],
-    "Cloud Storage Exposure": [
-        "site:s3.amazonaws.com \"{domain}\"",
-        "site:blob.core.windows.net \"{domain}\"",
+    "Documents & Sensitive Terms": [
+        "site:{domain} (ext:pdf OR ext:doc OR ext:docx OR ext:xls OR ext:csv)",
+        "site:{domain} filetype:pdf (\"confidential\" OR \"internal use\" OR \"do not distribute\")",
+        "site:{domain} (\"private key\" OR \"internal only\" OR \"restricted\") filetype:pdf",
+        "site:{domain} filetype:xlsx (salary OR payroll OR invoice)",
     ],
-    "Code Repository Exposure": [
-        "site:github.com \"{domain}\" filename:.env",
-        "site:github.com \"{domain}\" filename:config.yaml password",
+    "CI/CD & DevOps Exposure": [
+        "site:{domain} (.gitlab-ci.yml OR Jenkinsfile OR docker-compose.yml)",
+        "site:github.com \"{domain}\" (\"workflow\" OR \"actions\") (secret OR token)",
+        "site:{domain} (inurl:.git OR inurl:.svn)",
+        "site:{domain} (\"npmrc\" OR \"pypirc\" OR \"pip.conf\") (token OR password)",
     ],
 }
 
@@ -180,7 +229,28 @@ FINDING_PREFIXES: dict[str, str] = {
     "dns_email_auth": "DNS",
     "metadata_extractor": "META",
     "google_dorks": "DORK",
+    "shodan_recon": "SHODAN",
 }
+
+SHODAN_HOST_URL: str = "https://api.shodan.io/shodan/host/{ip}"
+
+SHODAN_CRITICAL_PORTS: list[int] = [3306, 5432, 27017, 6379, 9200, 5984]
+
+SHODAN_HIGH_PORTS: list[int] = [21, 23, 445, 135, 139, 512, 513, 514]
+
+SHODAN_MEDIUM_PORTS: list[int] = [8080, 8443, 8888]
+
+SHODAN_ADMIN_TITLES: list[str] = [
+    "phpMyAdmin",
+    "Kibana",
+    "Grafana",
+    "Jenkins",
+    "Jupyter",
+    "Portainer",
+    "RabbitMQ",
+]
+
+SHODAN_LEGACY_PROTOCOLS: list[int] = [21, 23, 512, 513, 514]
 
 CONFIG_FILES_TO_SCAN: list[str] = [
     ".env.example",

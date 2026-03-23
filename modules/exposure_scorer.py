@@ -17,6 +17,7 @@ from core.models import (
     MetadataResult,
     PasteResult,
     RiskSeverity,
+    ShodanReconResult,
     SocialFootprintResult,
 )
 
@@ -88,6 +89,7 @@ def run(
     dns_email_auth: EmailAuthResult,
     metadata_extractor: MetadataResult,
     google_dorks: GoogleDorksResult,
+    shodan_recon: ShodanReconResult,
 ) -> ExposureScoreResult:
     """Aggregate module score impacts and emit normalized findings."""
 
@@ -101,6 +103,7 @@ def run(
         "dns_email_auth": dns_email_auth.score_impact,
         "metadata_extractor": metadata_extractor.score_impact,
         "google_dorks": google_dorks.score_impact,
+        "shodan_recon": shodan_recon.score_impact,
     }
 
     total_score = min(sum(module_scores.values()), 100)
@@ -222,6 +225,25 @@ def run(
             "DuckDuckGo checks found potentially indexed exposure-relevant results.",
             "Review indexed content and harden access/robots directives where appropriate.",
             [],
+        )
+
+    if shodan_recon.score_impact > 0:
+        _add_finding(
+            findings,
+            counters,
+            "shodan_recon",
+            "Host & Service Exposure",
+            shodan_recon.score_impact,
+            "Critical internet-facing service exposure detected",
+            (
+                f"Shodan identified {shodan_recon.total_open_ports} open ports across "
+                f"{len(shodan_recon.hosts)} resolved hosts."
+            ),
+            (
+                "Restrict exposed management/database ports to private networks and "
+                "review public service hardening."
+            ),
+            ["https://www.shodan.io/"],
         )
 
     return ExposureScoreResult(findings=findings, score=total_score, label=_label_for_score(total_score))

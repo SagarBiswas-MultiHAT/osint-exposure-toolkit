@@ -11,6 +11,7 @@ from core.models import (
     JSSecretResult,
     MetadataResult,
     PasteResult,
+    ShodanReconResult,
     SocialFootprintResult,
 )
 from modules.exposure_scorer import run
@@ -27,6 +28,7 @@ def test_zero_findings_score_zero() -> None:
         dns_email_auth=EmailAuthResult(),
         metadata_extractor=MetadataResult(),
         google_dorks=GoogleDorksResult(),
+        shodan_recon=ShodanReconResult(),
     )
 
     assert result.score == 0
