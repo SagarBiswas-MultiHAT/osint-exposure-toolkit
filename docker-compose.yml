@@ -1,0 +1,8 @@
+services:
+  osint:
+    build: .
+    container_name: osint-exposure-toolkit
+    volumes:
+      - ./output:/app/output
+      - ./config.yaml:/app/config.yaml:ro
+    command: ["--domain", "example.com", "--demo-mode"]

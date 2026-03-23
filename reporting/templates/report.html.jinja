@@ -3,9 +3,335 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Digital Exposure Report</title>
+  <title>DIGITAL EXPOSURE REPORT</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card: #161b22;
+      --accent: #58a6ff;
+      --text: #c9d1d9;
+      --muted: #8b949e;
+      --high: #ff4d4f;
+      --medium: #f39c12;
+      --low: #1f6feb;
+      --pass: #2ecc71;
+      --border: #30363d;
+      --critical: #ff0000;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, sans-serif;
+      display: flex;
+    }
+
+    aside {
+      width: 260px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      overflow: auto;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      padding: 16px;
+    }
+
+    aside a {
+      color: var(--text);
+      text-decoration: none;
+      display: block;
+      margin: 8px 0;
+    }
+
+    main {
+      margin-left: 280px;
+      width: calc(100% - 280px);
+      padding: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--border);
+      padding: 8px;
+      text-align: left;
+    }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      display: inline-block;
+    }
+
+    .green { background: rgba(46, 204, 113, 0.2); color: var(--pass); }
+    .yellow { background: rgba(243, 156, 18, 0.2); color: var(--medium); }
+    .red { background: rgba(255, 77, 79, 0.2); color: var(--high); }
+    .muted { color: var(--muted); }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .search-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    input, select {
+      background: #0b0f14;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+        color: #000000;
+        display: block;
+      }
+      aside {
+        display: none;
+      }
+      main {
+        margin: 0;
+        width: 100%;
+      }
+      .card {
+        border-color: #cccccc;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>DIGITAL EXPOSURE REPORT</h1>
+  <aside>
+    <h3>DIGITAL EXPOSURE REPORT</h3>
+    <a href="#executive-summary">1. Executive Summary</a>
+    <a href="#credential-leaks">2. Credential Leaks</a>
+    <a href="#github-exposure">3. GitHub Exposure</a>
+    <a href="#email-intelligence">4. Email Intelligence</a>
+    <a href="#social-footprint">5. Social Footprint</a>
+    <a href="#paste-site-exposure">6. Paste Site Exposure</a>
+    <a href="#js-file-secrets">7. JS File Secrets</a>
+    <a href="#email-authentication">8. Email Authentication</a>
+    <a href="#document-metadata">9. Document Metadata</a>
+    <a href="#google-dork-recipe">10. Google Dork Recipe</a>
+    <a href="#risk-summary">11. Risk Summary & Recommendations</a>
+    <a href="#appendix">12. Appendix</a>
+  </aside>
+
+  <main>
+    <header class="card">
+      <h1>DIGITAL EXPOSURE REPORT</h1>
+      <p>Target: {{ target_email or "N/A" }} / {{ target_domain or "N/A" }}</p>
+      <p class="muted">Assessment date: {{ generated_at }} | {{ tool_name }} v{{ tool_version }}</p>
+      <span class="badge yellow">Passive OSINT | Authorized Assessment</span>
+    </header>
+
+    <section id="executive-summary" class="card">
+      <h2>Executive Summary</h2>
+      <p><strong>Exposure Score:</strong> {{ score }} / 100 — {{ label }}</p>
+      <div class="stat-grid">
+        <div class="card"><strong>Credential Breaches</strong><br>{{ credential_leak.total_breaches }}</div>
+        <div class="card"><strong>GitHub Secrets</strong><br>{{ github_footprint.secrets_found | length }}</div>
+        <div class="card"><strong>Social Profiles Exposed</strong><br>{{ social_footprint.total_exposure_count }}</div>
+        <div class="card"><strong>Email Spoofability</strong><br>{{ dns_email_auth.spoofability_score }}/10</div>
+      </div>
+    </section>
+
+    <section id="credential-leaks" class="card">
+      <h2>Credential Leaks</h2>
+      {% if credential_leak.demo_mode %}
+      <p class="badge yellow">⚠️ Demo Mode — Breach data loaded from fixture file.</p>
+      {% endif %}
+
+      <div class="search-row">
+        <input type="text" id="breachSearch" placeholder="Search breach name/domain" />
+        <select id="verifiedFilter">
+          <option value="ALL">Verified: All</option>
+          <option value="true">Verified only</option>
+          <option value="false">Unverified only</option>
+        </select>
+      </div>
+
+      <table id="breachTable">
+        <thead>
+          <tr>
+            <th data-sort="name">Name</th>
+            <th data-sort="domain">Domain</th>
+            <th data-sort="breach_date">Breach Date</th>
+            <th>Data Classes</th>
+            <th data-sort="is_verified">Verified</th>
+            <th data-sort="pwn_count">Records</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="search-row">
+        <button id="prevPage">Previous</button>
+        <span id="pageInfo" class="muted"></span>
+        <button id="nextPage">Next</button>
+      </div>
+    </section>
+
+    <section id="github-exposure" class="card"><h2>GitHub Exposure</h2></section>
+    <section id="email-intelligence" class="card"><h2>Email Intelligence</h2></section>
+    <section id="social-footprint" class="card"><h2>Social Footprint</h2></section>
+    <section id="paste-site-exposure" class="card"><h2>Paste Site Exposure</h2></section>
+    <section id="js-file-secrets" class="card"><h2>JS File Secrets</h2></section>
+    <section id="email-authentication" class="card"><h2>Email Authentication</h2></section>
+    <section id="document-metadata" class="card"><h2>Document Metadata</h2></section>
+    <section id="google-dork-recipe" class="card"><h2>Google Dork Recipe</h2></section>
+
+    <section id="risk-summary" class="card">
+      <h2>Risk Summary & Recommendations</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>Category</th><th>Risk</th><th>Score Impact</th><th>Recommendation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for finding in findings %}
+          <tr>
+            <td>{{ finding.id }}</td>
+            <td>{{ finding.category }}</td>
+            <td>{{ finding.risk }}</td>
+            <td>{{ finding.score_impact }}</td>
+            <td>{{ finding.recommendation }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <section id="appendix" class="card">
+      <h2>Appendix</h2>
+      <p class="muted">
+        This report was generated passively using publicly available data sources.
+        No unauthorized access was performed. Assessment conducted by Sagar Biswas.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    const breachRows = {{ credential_leak.breaches | tojson }};
+    const rowsPerPage = 10;
+    let currentPage = 1;
+    let currentSortKey = "name";
+    let sortDirection = 1;
+
+    function normalize(value) {
+      return String(value ?? "").toLowerCase();
+    }
+
+    function filteredRows() {
+      const searchValue = normalize(document.getElementById("breachSearch").value);
+      const verifiedFilter = document.getElementById("verifiedFilter").value;
+
+      const rows = breachRows.filter((row) => {
+        const matchesSearch =
+          normalize(row.name).includes(searchValue) || normalize(row.domain).includes(searchValue);
+        const matchesVerified =
+          verifiedFilter === "ALL" || String(row.is_verified) === verifiedFilter;
+        return matchesSearch && matchesVerified;
+      });
+
+      rows.sort((a, b) => {
+        const aValue = a[currentSortKey];
+        const bValue = b[currentSortKey];
+        if (aValue === bValue) return 0;
+        return aValue > bValue ? sortDirection : -sortDirection;
+      });
+
+      return rows;
+    }
+
+    function renderTable() {
+      const rows = filteredRows();
+      const tableBody = document.querySelector("#breachTable tbody");
+      tableBody.innerHTML = "";
+
+      const totalPages = Math.max(1, Math.ceil(rows.length / rowsPerPage));
+      currentPage = Math.min(currentPage, totalPages);
+
+      const start = (currentPage - 1) * rowsPerPage;
+      const pagedRows = rows.slice(start, start + rowsPerPage);
+
+      for (const row of pagedRows) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row.name}</td>
+          <td>${row.domain || "—"}</td>
+          <td>${row.breach_date}</td>
+          <td>${(row.data_classes || []).join(", ")}</td>
+          <td>${row.is_verified ? "true" : "false"}</td>
+          <td>${Number(row.pwn_count || 0).toLocaleString()}</td>
+        `;
+        tableBody.appendChild(tr);
+      }
+
+      document.getElementById("pageInfo").textContent = `Page ${currentPage} of ${totalPages}`;
+      document.getElementById("prevPage").disabled = currentPage <= 1;
+      document.getElementById("nextPage").disabled = currentPage >= totalPages;
+    }
+
+    document.getElementById("breachSearch").addEventListener("input", () => {
+      currentPage = 1;
+      renderTable();
+    });
+
+    document.getElementById("verifiedFilter").addEventListener("change", () => {
+      currentPage = 1;
+      renderTable();
+    });
+
+    document.getElementById("prevPage").addEventListener("click", () => {
+      currentPage -= 1;
+      renderTable();
+    });
+
+    document.getElementById("nextPage").addEventListener("click", () => {
+      currentPage += 1;
+      renderTable();
+    });
+
+    for (const header of document.querySelectorAll("#breachTable th[data-sort]")) {
+      header.style.cursor = "pointer";
+      header.addEventListener("click", () => {
+        const key = header.dataset.sort;
+        if (currentSortKey === key) {
+          sortDirection *= -1;
+        } else {
+          currentSortKey = key;
+          sortDirection = 1;
+        }
+        renderTable();
+      });
+    }
+
+    renderTable();
+  </script>
 </body>
 </html>
