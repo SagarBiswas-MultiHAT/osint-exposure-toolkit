@@ -5,4 +5,4 @@ services:
     volumes:
       - ./output:/app/output
       - ./config.yaml:/app/config.yaml:ro
-    command: ["--domain", "example.com", "--demo-mode"]
+    command: [ "--domain", "example.com", "--demo-mode" ]
