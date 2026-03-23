@@ -1,0 +1,17 @@
+output/
+.git/
+.github/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.env.*
+*.log
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+output/**

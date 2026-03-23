@@ -1,0 +1,107 @@
+{
+    "email": "demo@example.com",
+    "breaches": [
+        {
+            "Name": "LinkedIn",
+            "Title": "LinkedIn",
+            "Domain": "linkedin.com",
+            "BreachDate": "2012-05-05",
+            "AddedDate": "2016-05-18T07:44:00Z",
+            "ModifiedDate": "2016-05-18T07:44:00Z",
+            "PwnCount": 164611595,
+            "Description": "In May 2016, LinkedIn had 164 million email addresses and passwords exposed.",
+            "LogoPath": "https://haveibeenpwned.com/Content/Images/PwnedLogos/LinkedIn.png",
+            "DataClasses": [
+                "Email addresses",
+                "Passwords"
+            ],
+            "IsVerified": true,
+            "IsFabricated": false,
+            "IsSensitive": false,
+            "IsRetired": false,
+            "IsSpamList": false,
+            "IsMalware": false
+        },
+        {
+            "Name": "Adobe",
+            "Title": "Adobe",
+            "Domain": "adobe.com",
+            "BreachDate": "2013-10-04",
+            "AddedDate": "2013-12-04T00:00:00Z",
+            "ModifiedDate": "2013-12-04T00:00:00Z",
+            "PwnCount": 153000000,
+            "Description": "Adobe suffered a major breach exposing usernames, emails and password hints.",
+            "LogoPath": "https://haveibeenpwned.com/Content/Images/PwnedLogos/Adobe.png",
+            "DataClasses": [
+                "Email addresses",
+                "Password hints",
+                "Usernames"
+            ],
+            "IsVerified": true,
+            "IsFabricated": false,
+            "IsSensitive": false,
+            "IsRetired": false,
+            "IsSpamList": false,
+            "IsMalware": false
+        },
+        {
+            "Name": "Dropbox",
+            "Title": "Dropbox",
+            "Domain": "dropbox.com",
+            "BreachDate": "2012-07-01",
+            "AddedDate": "2016-08-31T00:00:00Z",
+            "ModifiedDate": "2016-08-31T00:00:00Z",
+            "PwnCount": 68648009,
+            "Description": "Dropbox credentials were exposed from a 2012 breach and surfaced in 2016.",
+            "LogoPath": "https://haveibeenpwned.com/Content/Images/PwnedLogos/Dropbox.png",
+            "DataClasses": [
+                "Email addresses",
+                "Passwords"
+            ],
+            "IsVerified": true,
+            "IsFabricated": false,
+            "IsSensitive": false,
+            "IsRetired": false,
+            "IsSpamList": false,
+            "IsMalware": false
+        },
+        {
+            "Name": "MySpace",
+            "Title": "MySpace",
+            "Domain": "myspace.com",
+            "BreachDate": "2008-06-11",
+            "AddedDate": "2016-06-01T00:00:00Z",
+            "ModifiedDate": "2016-06-01T00:00:00Z",
+            "PwnCount": 359420698,
+            "Description": "MySpace had hundreds of millions of records exposed including passwords.",
+            "LogoPath": "https://haveibeenpwned.com/Content/Images/PwnedLogos/MySpace.png",
+            "DataClasses": [
+                "Email addresses",
+                "Passwords",
+                "Usernames"
+            ],
+            "IsVerified": true,
+            "IsFabricated": false,
+            "IsSensitive": false,
+            "IsRetired": false,
+            "IsSpamList": false,
+            "IsMalware": false
+        }
+    ],
+    "pastes": [
+        {
+            "Source": "Pastebin",
+            "Id": "Yh7KxP1Q",
+            "Title": "corp dump sample",
+            "Date": "2024-01-20T11:30:00Z",
+            "EmailCount": 1
+        },
+        {
+            "Source": "Pastebin",
+            "Id": "M9kq2ZaR",
+            "Title": "credentials list",
+            "Date": "2024-08-04T16:05:00Z",
+            "EmailCount": 1
+        }
+    ]
+}

@@ -1,0 +1,38 @@
+general:
+  output_dir: ./output
+  log_level: INFO
+  request_timeout: 15
+  max_concurrent_requests: 3
+  output_formats: [html, json, md]
+
+api_keys:
+  hibp: ""
+  github: ""
+
+modules:
+  credential_leak: true
+  github_footprint: true
+  email_intel: true
+  social_footprint: true
+  paste_monitor: true
+  metadata_extractor: true
+  google_dorks: true
+  js_secret_scanner: true
+  dns_email_auth: true
+  exposure_graph: true
+
+rate_limits:
+  hibp_delay: 1.5
+  github_delay: 1.0
+  social_check_delay: 0.5
+  ddg_delay: 5.0
+  dns_concurrent: 5
+
+scan_limits:
+  max_github_repos: 10
+  max_github_files: 5
+  max_workflow_files: 3
+  max_js_files: 10
+  max_docs_to_fetch: 5
+  max_social_platforms: 15
+  max_dork_live_checks: 3
