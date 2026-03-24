@@ -171,6 +171,12 @@ python main.py --email cto@example.com --domain example.com
 # LeakCheck is default (same as no engine flags)
 python main.py --email user@example.com
 
+# LeakCheck with username
+python main.py --email user@example.com --username user123
+
+# Only username (no email)
+python main.py --username user123
+
 # Force HIBP path and choose Free/Premium interactively
 python main.py --email user@example.com --use-hibp
 

@@ -210,6 +210,7 @@ def _module_summary_rows(
 
 async def _run(
     email: str | None,
+    username: str | None,
     domain: str | None,
     use_hibp: bool,
     free_hibp: bool,
@@ -321,7 +322,7 @@ async def _run(
             if not _is_module_enabled(config, "social_footprint", selected_modules):
                 return SocialFootprintResult(skipped=True, skip_reason="Not selected")
             try:
-                return await run_social_footprint(session, semaphore, config, email)
+                return await run_social_footprint(session, semaphore, config, email, username)
             except Exception:
                 logger.exception("social_footprint failed")
                 return SocialFootprintResult(skipped=True, skip_reason="Execution error")
@@ -440,6 +441,7 @@ async def _run(
 
 @click.command()
 @click.option("--email", type=str, default=None, help="Email to investigate")
+@click.option("--username", type=str, default=None, help="Preferred username to probe across social platforms")
 @click.option("--domain", type=str, default=None, help="Domain to investigate")
 @click.option("--use-hibp", is_flag=True, help="Use HIBP engine instead of default LeakCheck")
 @click.option("--free-hibp", is_flag=True, help="Skip prompt and force Free HIBP mode")
@@ -451,6 +453,7 @@ async def _run(
 @click.option("--config", "config_path", default="config.yaml", type=str, help="Config file path")
 def main(
     email: str | None,
+    username: str | None,
     domain: str | None,
     use_hibp: bool,
     free_hibp: bool,
@@ -463,8 +466,8 @@ def main(
 ) -> None:
     """Run the OSINT Digital Exposure Toolkit CLI."""
 
-    if not email and not domain:
-        raise click.UsageError("At least one of --email or --domain is required.")
+    if not email and not domain and not username:
+        raise click.UsageError("At least one of --email, --domain, or --username is required.")
     if use_hibp and (free_hibp or demo_mode):
         raise click.UsageError(
             "--use-hibp is redundant when --free-hibp or --demo-mode is set. Use only one HIBP flag."
@@ -474,6 +477,7 @@ def main(
     asyncio.run(
         _run(
             email=email,
+            username=username,
             domain=domain,
             use_hibp=use_hibp,
             free_hibp=free_hibp,

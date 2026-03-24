@@ -548,9 +548,12 @@
           {% else %}
             {% set c = 'gray' %}
           {% endif %}
-          <a class="platform-badge {{ c }}" href="{{ profile.url }}" target="_blank">
+          <a class="platform-badge {{ c }}" href="{{ profile.url }}" target="_blank" {% if profile.status_reason %}title="{{ profile.status_reason }}"{% endif %}>
             {{ profile.platform }}
             <small>{{ profile.status }}</small>
+            {% if profile.status_reason and profile.status != 'EXPOSED' %}
+            <small class="muted">{{ profile.status_reason }}</small>
+            {% endif %}
           </a>
         {% endfor %}
       </div>

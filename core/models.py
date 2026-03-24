@@ -177,6 +177,7 @@ class SocialProfileEntry(BaseModel):
     platform: str
     url: str
     status: PlatformStatus
+    status_reason: str | None = None
     username_tried: str | None = None
     is_positive_signal: bool = False
 

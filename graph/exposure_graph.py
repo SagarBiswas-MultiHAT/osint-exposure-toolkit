@@ -10,9 +10,67 @@ from pyvis.network import Network
 from core.models import ReportContext
 
 
+def _escape_html(value: str) -> str:
+    return (
+        str(value)
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+    )
+
+
+def _hover_summary(
+    *,
+    label: str,
+    status: str,
+    module: str,
+    details: str,
+    url: str = "",
+) -> str:
+    lines = [
+        f"{label}",
+        f"Status: {status}",
+        f"Module: {module}",
+        f"Details: {details}",
+    ]
+    if url:
+        lines.append(f"URL: {url}")
+    return "\n".join(_escape_html(line) for line in lines)
+
+
 def _detail_panel_markup() -> str:
         return """
 <style>
+    html, body {
+        background: #0d1117 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .vis-tooltip {
+        background: #111827 !important;
+        color: #e5e7eb !important;
+        border: 1px solid #374151 !important;
+        border-radius: 8px !important;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4) !important;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif !important;
+        font-size: 12px !important;
+        white-space: pre-line !important;
+        max-width: 420px !important;
+        padding: 8px 10px !important;
+    }
+
+    .card {
+        margin: 0 !important;
+        border: none !important;
+        background: transparent !important;
+    }
+
+    #mynetwork {
+        min-height: 100vh !important;
+        border: 0 !important;
+    }
+
     .exposure-detail-panel {
         position: fixed;
         top: 16px;
@@ -57,6 +115,21 @@ def _detail_panel_markup() -> str:
         word-break: break-word;
     }
 
+    .exposure-detail-grid .v.status-exposed {
+        color: #f87171;
+        font-weight: 700;
+    }
+
+    .exposure-detail-grid .v.status-unknown {
+        color: #fbbf24;
+        font-weight: 600;
+    }
+
+    .exposure-detail-grid .v.status-not_found {
+        color: #9ca3af;
+        font-weight: 600;
+    }
+
     .exposure-detail-actions {
         display: flex;
         gap: 8px;
@@ -89,6 +162,7 @@ def _detail_panel_markup() -> str:
     <div class=\"exposure-detail-actions\">\
         <button id=\"copyNodeSummary\" type=\"button\">Copy Node Summary</button>\
         <button id=\"copyNodeUrl\" type=\"button\">Copy URL</button>\
+        <button id=\"openNodeUrl\" type=\"button\">Open URL</button>\
     </div>\
     <div id=\"exposureDetailToast\" class=\"exposure-detail-toast\"></div>\
 </div>
@@ -104,6 +178,7 @@ def _detail_panel_script() -> str:
     const gridEl = document.getElementById("exposureDetailGrid");
     const copySummaryBtn = document.getElementById("copyNodeSummary");
     const copyUrlBtn = document.getElementById("copyNodeUrl");
+    const openUrlBtn = document.getElementById("openNodeUrl");
     const toastEl = document.getElementById("exposureDetailToast");
 
     let lastNode = null;
@@ -136,7 +211,22 @@ def _detail_panel_script() -> str:
         if (node.severity) lines.push(`Severity: ${node.severity}`);
         if (node.url) lines.push(`URL: ${node.url}`);
         if (node.details) lines.push(`Details: ${node.details}`);
-        return lines.join("\n");
+        if (node.status_reason) lines.push(`Reason: ${node.status_reason}`);
+        return lines.join("\\n");
+    }
+
+    function getNodeUrl(node) {
+        const value = (node && node.url) ? String(node.url).trim() : "";
+        if (!value) return "";
+        return /^https?:\\/\\//i.test(value) ? value : "";
+    }
+
+    function statusClass(status) {
+        const value = String(status || "").toUpperCase();
+        if (value === "EXPOSED") return "status-exposed";
+        if (value === "UNKNOWN") return "status-unknown";
+        if (value === "NOT_FOUND") return "status-not_found";
+        return "";
     }
 
     function renderGrid(node) {
@@ -147,12 +237,16 @@ def _detail_panel_script() -> str:
             ["Status", node.status || "N/A"],
             ["URL", node.url || "N/A"],
             ["Details", node.details || "N/A"],
+            ["Reason", node.status_reason || "N/A"],
             ["Source", node.source || "N/A"],
             ["Context", node.context || "N/A"],
         ];
 
         gridEl.innerHTML = fields
-            .map(([key, value]) => `<div class=\"k\">${escapeHtml(key)}</div><div class=\"v\">${escapeHtml(value)}</div>`)
+            .map(([key, value]) => {
+                const extra = key === "Status" ? ` ${statusClass(value)}` : "";
+                return `<div class=\"k\">${escapeHtml(key)}</div><div class=\"v${extra}\">${escapeHtml(value)}</div>`;
+            })
             .join("");
     }
 
@@ -187,12 +281,22 @@ def _detail_panel_script() -> str:
     });
 
     copyUrlBtn?.addEventListener("click", async () => {
-        if (!lastNode || !lastNode.url) {
+        const url = getNodeUrl(lastNode);
+        if (!url) {
             toast("No URL available for this node", true);
             return;
         }
-        const ok = await copyText(lastNode.url);
+        const ok = await copyText(url);
         toast(ok ? "URL copied" : "Failed to copy URL", !ok);
+    });
+
+    openUrlBtn?.addEventListener("click", () => {
+        const url = getNodeUrl(lastNode);
+        if (!url) {
+            toast("No URL available for this node", true);
+            return;
+        }
+        window.open(url, "_blank", "noopener,noreferrer");
     });
 
     function bindNetworkClick() {
@@ -243,6 +347,7 @@ async def generate(context: ReportContext) -> Path:
 
     graph.add_node(
         target_node,
+        label=target_node,
         type="TARGET",
         category="TARGET",
         module="main",
@@ -253,13 +358,19 @@ async def generate(context: ReportContext) -> Path:
         source="input",
         details=f"Primary target: {target_node}",
         context=f"Email={context.target_email or 'N/A'} | Domain={context.target_domain or 'N/A'}",
-        title=f"Target: {target_node}",
+        title=_hover_summary(
+            label=target_node,
+            status="N/A",
+            module="main",
+            details=f"Primary target: {target_node}",
+        ),
     )
 
     for idx, breach in enumerate(context.credential_leak.breaches, start=1):
         breach_node = f"breach:{idx}:{breach.name}"
         graph.add_node(
             breach_node,
+            label=breach.name,
             type="BREACH",
             category="BREACH",
             module="credential_leak",
@@ -271,7 +382,13 @@ async def generate(context: ReportContext) -> Path:
             url=f"https://{breach.domain}" if breach.domain else "",
             details=f"{breach.name} ({breach.breach_date})",
             context=f"PwnCount={breach.pwn_count} | DataClasses={', '.join(breach.data_classes[:6])}",
-            title=f"{breach.name} ({breach.breach_date})",
+            title=_hover_summary(
+                label=breach.name,
+                status="EXPOSED",
+                module="credential_leak",
+                details=f"Breach date: {breach.breach_date}",
+                url=f"https://{breach.domain}" if breach.domain else "",
+            ),
         )
         graph.add_edge(target_node, breach_node, label="found in breach")
 
@@ -279,6 +396,7 @@ async def generate(context: ReportContext) -> Path:
         repo_node = f"repo:{idx}:{repo.name}"
         graph.add_node(
             repo_node,
+            label=repo.name,
             type="GITHUB REPO",
             category="GITHUB_REPO",
             module="github_footprint",
@@ -290,7 +408,13 @@ async def generate(context: ReportContext) -> Path:
             url=repo.html_url or "",
             details=repo.name,
             context=f"Stars={repo.stars} | Forks={repo.forks} | Language={repo.language or 'N/A'}",
-            title=repo.name,
+            title=_hover_summary(
+                label=repo.name,
+                status="EXPOSED",
+                module="github_footprint",
+                details=f"Stars={repo.stars} | Forks={repo.forks}",
+                url=repo.html_url or "",
+            ),
         )
         graph.add_edge(target_node, repo_node, label="maintains")
 
@@ -300,6 +424,7 @@ async def generate(context: ReportContext) -> Path:
         secret_node = f"secret:{idx}:{secret.repo}:{secret.pattern_type}"
         graph.add_node(
             secret_node,
+            label=secret.pattern_type,
             type="SECRET FOUND",
             category="SECRET",
             module="github_footprint",
@@ -311,35 +436,79 @@ async def generate(context: ReportContext) -> Path:
             url="",
             details=secret.pattern_type,
             context=f"Repo={secret.repo} | File={secret.file_path} | Value={secret.masked_value}",
-            title=secret.pattern_type,
+            title=_hover_summary(
+                label=secret.pattern_type,
+                status="EXPOSED",
+                module="github_secret_scan",
+                details=f"Repo={secret.repo} | File={secret.file_path}",
+            ),
         )
         repo_ref = repo_id_by_name.get(secret.repo)
         graph.add_edge(repo_ref or target_node, secret_node, label="exposes secret")
 
     for idx, profile in enumerate(context.social_footprint.profiles, start=1):
         profile_node = f"profile:{idx}:{profile.platform}:{profile.username_tried or 'none'}"
-        color = "#00bcd4" if str(profile.status) == "EXPOSED" else "#6b7280"
+        status_value = str(profile.status)
+        if status_value == "EXPOSED":
+            color = "#00bcd4"
+            edge_label = "profile exposed"
+            edge_color = "#ff4d4f"
+            font_color = "#ff6b6b"
+        elif status_value == "NOT_FOUND":
+            color = "#6b7280"
+            edge_label = "profile not found"
+            edge_color = "#6b7280"
+            font_color = "#c9d1d9"
+        else:
+            color = "#f59e0b"
+            edge_label = "profile unknown"
+            edge_color = "#f59e0b"
+            font_color = "#fbbf24"
+
         graph.add_node(
             profile_node,
+            label=profile.platform,
             type="SOCIAL PROFILE",
             category="SOCIAL_PROFILE",
             module="social_footprint",
             color=color,
+            font={"color": font_color},
             size=16,
-            severity="LOW" if str(profile.status) == "EXPOSED" else "INFO",
-            status=str(profile.status),
+            severity="LOW" if status_value == "EXPOSED" else "INFO",
+            status=status_value,
+            status_reason=profile.status_reason or "",
             source="social_footprint",
             url=profile.url,
-            details=f"Platform={profile.platform}",
-            context=f"Username={profile.username_tried or 'N/A'} | PositiveSignal={profile.is_positive_signal}",
-            title=profile.url,
+            details=(
+                profile.status_reason
+                or f"{profile.platform} profile {status_value.lower().replace('_', ' ')}"
+            ),
+            context=(
+                f"Username={profile.username_tried or 'N/A'} | "
+                f"PositiveSignal={profile.is_positive_signal}"
+            ),
+            title=_hover_summary(
+                label=profile.platform,
+                status=status_value,
+                module="social_footprint",
+                details=(
+                    f"Username: {profile.username_tried or 'N/A'}"
+                    + (
+                        f" | Reason: {profile.status_reason}"
+                        if profile.status_reason and status_value != "EXPOSED"
+                        else ""
+                    )
+                ),
+                url=profile.url,
+            ),
         )
-        graph.add_edge(target_node, profile_node, label="profile found")
+        graph.add_edge(target_node, profile_node, label=edge_label, color=edge_color)
 
     for idx, paste in enumerate(context.paste_monitor.pastes, start=1):
         paste_node = f"paste:{idx}:{paste.identifier}"
         graph.add_node(
             paste_node,
+            label=paste.title,
             type="PASTE",
             category="PASTE",
             module="paste_monitor",
@@ -351,7 +520,12 @@ async def generate(context: ReportContext) -> Path:
             url="",
             details=paste.title,
             context=f"Identifier={paste.identifier} | Date={paste.date} | Emails={paste.email_count}",
-            title=paste.title,
+            title=_hover_summary(
+                label=paste.title,
+                status="EXPOSED",
+                module="paste_monitor",
+                details=f"Source={paste.source} | Date={paste.date}",
+            ),
         )
         graph.add_edge(target_node, paste_node, label="appeared in paste")
 
@@ -359,6 +533,7 @@ async def generate(context: ReportContext) -> Path:
         doc_node = f"doc:{idx}:{finding.document_url}"
         graph.add_node(
             doc_node,
+            label=finding.field_name,
             type="DOCUMENT",
             category="DOCUMENT",
             module="metadata_extractor",
@@ -370,13 +545,20 @@ async def generate(context: ReportContext) -> Path:
             url=finding.document_url,
             details=finding.field_name,
             context=f"Value={finding.value}",
-            title=finding.field_name,
+            title=_hover_summary(
+                label=finding.field_name,
+                status="EXPOSED",
+                module="metadata_extractor",
+                details=f"Value: {finding.value}",
+                url=finding.document_url,
+            ),
         )
         graph.add_edge(target_node, doc_node, label="document metadata")
 
     dns_node = f"dns:{context.target_domain or 'domain'}"
     graph.add_node(
         dns_node,
+        label="DNS Email Auth",
         type="DNS RECORD",
         category="DNS_EMAIL_AUTH",
         module="dns_email_auth",
@@ -392,14 +574,19 @@ async def generate(context: ReportContext) -> Path:
             f"DMARC={context.dns_email_auth.dmarc.policy or 'missing'} | "
             f"DKIM selectors={len(context.dns_email_auth.dkim.selectors_found)}"
         ),
-        title=f"Spoofability {context.dns_email_auth.spoofability_score}/10",
+        title=_hover_summary(
+            label="DNS Email Auth",
+            status="N/A",
+            module="dns_email_auth",
+            details=f"Spoofability: {context.dns_email_auth.spoofability_score}/10",
+        ),
     )
     graph.add_edge(target_node, dns_node, label="email auth posture")
 
     network = Network(height="850px", width="100%", bgcolor="#0d1117", font_color="#c9d1d9", cdn_resources="in_line", notebook=False)
     network.from_nx(graph)
     network.toggle_physics(True)
-    network.barnes_hut(gravity=-20000, central_gravity=0.2, spring_length=180, spring_strength=0.04, damping=0.09)
+    network.barnes_hut(gravity=-18000, central_gravity=0.18, spring_length=240, spring_strength=0.035, damping=0.09)
     network.save_graph(str(output_file))
 
     html = output_file.read_text(encoding="utf-8")
