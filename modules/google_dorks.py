@@ -60,12 +60,9 @@ async def _ddg_check(
                     body = await response.text()
                     return DDGResult.RESULTS_FOUND if _looks_like_results_found(body) else DDGResult.NO_RESULTS
                 if response.status in {202, 429}:
-                    LOGGER.warning("DuckDuckGo blocked query check: %s", query)
                     return DDGResult.NOT_CHECKED
-                LOGGER.warning("DuckDuckGo non-200 status (%s) for query check.", response.status)
                 return DDGResult.NOT_CHECKED
         except (aiohttp.ClientError, TimeoutError):
-            LOGGER.warning("DuckDuckGo query check failed due to timeout/network issue.")
             return DDGResult.NOT_CHECKED
 
 
@@ -88,6 +85,7 @@ async def run(
     limiter = AsyncRateLimiter(config.rate_limits.ddg_delay)
 
     if enable_live_check:
+        block_notice_logged = False
         for result in dork_results:
             if checks_performed >= config.scan_limits.max_dork_live_checks:
                 break
@@ -108,6 +106,11 @@ async def run(
 
             if ddg_result == DDGResult.NOT_CHECKED:
                 blocked_streak += 1
+                if not block_notice_logged:
+                    LOGGER.info(
+                        "DuckDuckGo live query checks are being blocked/rate-limited; continuing with passive dork generation only."
+                    )
+                    block_notice_logged = True
             else:
                 blocked_streak = 0
 
