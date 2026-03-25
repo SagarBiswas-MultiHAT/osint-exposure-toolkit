@@ -844,7 +844,7 @@
   </main>
 
   <script>
-    {% if credential_leak.engine == 'hibp' and credential_leak.mode == 'free' %}
+    {% if credential_leak.engine == 'hibp' %}
     const breachRows = {{ credential_leak.breaches | tojson }};
     const rowsPerPage = 10;
     let currentPage = 1;

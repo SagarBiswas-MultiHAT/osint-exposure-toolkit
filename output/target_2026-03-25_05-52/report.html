@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DIGITAL EXPOSURE REPORT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card: #161b22;
+      --accent: #58a6ff;
+      --text: #c9d1d9;
+      --muted: #8b949e;
+      --high: #ff4d4f;
+      --medium: #f39c12;
+      --low: #1f6feb;
+      --pass: #2ecc71;
+      --border: #30363d;
+      --critical: #ff0000;
+      --cyan: #4dd0e1;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      display: flex;
+    }
+
+    code, .mono, table td.value {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    aside {
+      width: 280px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      overflow: auto;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    aside a {
+      color: var(--text);
+      text-decoration: none;
+      display: block;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+
+    main {
+      margin-left: 300px;
+      width: calc(100% - 300px);
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+
+    .subsection-title {
+      margin: 18px 0 8px;
+      font-size: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      display: inline-block;
+    }
+
+    .green { background: rgba(46, 204, 113, 0.2); color: var(--pass); }
+    .yellow { background: rgba(243, 156, 18, 0.2); color: var(--medium); }
+    .red { background: rgba(255, 77, 79, 0.2); color: var(--high); }
+    .blue { background: rgba(88, 166, 255, 0.2); color: var(--accent); }
+    .cyan { background: rgba(77, 208, 225, 0.2); color: var(--cyan); }
+    .gray { background: rgba(139, 148, 158, 0.2); color: var(--muted); }
+    .muted { color: var(--muted); }
+    .italic { font-style: italic; }
+
+    .alert {
+      border-left: 4px solid var(--high);
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: rgba(255, 77, 79, 0.12);
+      margin: 10px 0;
+    }
+
+    .info-card {
+      border-left: 4px solid var(--medium);
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: rgba(243, 156, 18, 0.12);
+      margin: 10px 0;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      background: #11161d;
+    }
+
+    .stat-item strong {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .stat-item span {
+      display: block;
+      margin-top: 6px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .gauge-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 24px 0;
+    }
+
+    .gauge {
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: background 0.4s ease;
+    }
+
+    .gauge::after {
+      content: "";
+      position: absolute;
+      width: 162px;
+      height: 162px;
+      border-radius: 50%;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+
+    .gauge-label {
+      position: absolute;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      z-index: 1;
+    }
+
+    .score-number {
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .score-denom { font-size: 18px; color: var(--muted); }
+    .score-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    .sev-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 6px 0;
+    }
+
+    .sev-label { width: 80px; font-size: 13px; color: var(--muted); }
+
+    .sev-bar-wrap {
+      flex: 1;
+      height: 10px;
+      background: var(--border);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .sev-bar { height: 100%; border-radius: 5px; transition: width 0.4s ease; }
+    .sev-count { width: 30px; font-size: 13px; text-align: right; }
+
+    .search-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    input, select, button {
+      background: #0b0f14;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .platform-badge {
+      display: block;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px;
+      font-size: 13px;
+      word-break: break-word;
+    }
+
+    .platform-badge small {
+      display: block;
+      margin-top: 2px;
+      opacity: 0.9;
+    }
+
+    pre {
+      background: #0b0f14;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      overflow: auto;
+    }
+
+    @media (max-width: 1100px) {
+      aside { display: none; }
+      main { margin-left: 0; width: 100%; }
+      .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media print {
+      body { background: #ffffff; color: #000000; display: block; }
+      aside { display: none; }
+      main { margin: 0; width: 100%; }
+      .card { border-color: #cccccc; }
+    }
+  </style>
+</head>
+<body>
+  <aside>
+    <h3>DIGITAL EXPOSURE REPORT</h3>
+    <a href="#executive-summary">1. Executive Summary</a>
+    <a href="#credential-leaks">2. Credential Leaks</a>
+    <a href="#github-exposure">3. GitHub Exposure</a>
+    <a href="#email-intelligence">4. Email Intelligence</a>
+    <a href="#social-footprint">5. Social Footprint</a>
+    <a href="#paste-site-exposure">6. Paste Site Exposure</a>
+    <a href="#js-file-secrets">7. JS File Secrets</a>
+    <a href="#email-authentication">8. Email Authentication</a>
+    <a href="#document-metadata">9. Document Metadata</a>
+    <a href="#google-dork-recipe">10. Google Dork Recipe</a>
+    <a href="#shodan-recon">11. Shodan Recon</a>
+    <a href="#risk-summary">12. Risk Summary & Recommendations</a>
+    <a href="#appendix">13. Appendix</a>
+  </aside>
+
+  <main>
+    <header class="card">
+      <h1>DIGITAL EXPOSURE REPORT</h1>
+      <p>Target: security@shopify.com / shopify.com</p>
+      <p class="muted">Assessment date: 2026-03-25 05:54 UTC | osint-exposure-toolkit v1.0.0</p>
+      <span class="badge yellow">Passive OSINT | Authorized Assessment</span>
+    </header>
+
+    <section id="executive-summary" class="card">
+      <h2>Executive Summary</h2>
+      <div class="gauge-wrap">
+        <div class="gauge" style="background: conic-gradient(#ff4d4f 63%, var(--border) 63%);">
+          <div class="gauge-label">
+            <span class="score-number">63</span>
+            <span class="score-denom">/100</span>
+            <span class="score-label">HIGH EXPOSURE</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-item"><strong>Credential Leaks</strong><span>4</span></div>
+        <div class="stat-item"><strong>GitHub Secrets</strong><span>0</span></div>
+        <div class="stat-item"><strong>Social Profiles Exposed</strong><span>5</span></div>
+        <div class="stat-item"><strong>Email Spoofability</strong><span>2/10</span></div>
+        <div class="stat-item"><strong>Shodan Open Ports</strong><span>13</span></div>
+      </div>
+
+      
+      <h3 class="subsection-title">Severity Breakdown</h3>
+      <div class="sev-row">
+        <span class="sev-label">CRITICAL</span>
+        <div class="sev-bar-wrap"><div class="sev-bar" style="width: 14.29%; background: var(--critical);"></div></div>
+        <span class="sev-count">1</span>
+      </div>
+      <div class="sev-row">
+        <span class="sev-label">HIGH</span>
+        <div class="sev-bar-wrap"><div class="sev-bar" style="width: 14.29%; background: var(--high);"></div></div>
+        <span class="sev-count">1</span>
+      </div>
+      <div class="sev-row">
+        <span class="sev-label">MEDIUM</span>
+        <div class="sev-bar-wrap"><div class="sev-bar" style="width: 14.29%; background: var(--medium);"></div></div>
+        <span class="sev-count">1</span>
+      </div>
+      <div class="sev-row">
+        <span class="sev-label">LOW</span>
+        <div class="sev-bar-wrap"><div class="sev-bar" style="width: 57.14%; background: var(--low);"></div></div>
+        <span class="sev-count">4</span>
+      </div>
+      <div class="sev-row">
+        <span class="sev-label">INFO</span>
+        <div class="sev-bar-wrap"><div class="sev-bar" style="width: 0.0%; background: var(--muted);"></div></div>
+        <span class="sev-count">0</span>
+      </div>
+    </section>
+
+    <section id="credential-leaks" class="card">
+      <h2>Credential Leaks
+        
+        <span class="badge yellow">HIBP (Demo)</span>
+        
+      </h2>
+
+      
+      <div class="search-row">
+        <input type="text" id="breachSearch" placeholder="Search breach name/domain" />
+        <select id="verifiedFilter">
+          <option value="ALL">Verified: All</option>
+          <option value="true">Verified only</option>
+          <option value="false">Unverified only</option>
+        </select>
+      </div>
+
+      <table id="breachTable">
+        <thead>
+          <tr>
+            <th data-sort="name">Name</th>
+            <th data-sort="domain">Domain</th>
+            <th data-sort="breach_date">Breach Date</th>
+            <th>Data Classes</th>
+            <th data-sort="is_verified">Verified</th>
+            <th data-sort="pwn_count">Records</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="search-row">
+        <button id="prevPage">Previous</button>
+        <span id="pageInfo" class="muted"></span>
+        <button id="nextPage">Next</button>
+      </div>
+      
+    </section>
+
+    <section id="github-exposure" class="card">
+      <h2>GitHub Exposure</h2>
+      
+      <p>Found 10 repositories (0 active in last 30 days). Secrets detected: 0</p>
+
+      <h3 class="subsection-title">Repositories</h3>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Repository</th>
+            <th>Language</th>
+            <th>Stars</th>
+            <th>Last Pushed</th>
+            <th>Active (≤30d)</th>
+            <th>Risk</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td><a href="https://github.com/potench/amazon-cloudfront-developer-guide" target="_blank">amazon-cloudfront-developer-guide</a></td>
+            <td>—</td>
+            <td>0</td>
+            <td class="mono">2020-12-18T18:21:33Z</td>
+            <td><span class="badge gray">NO</span></td>
+            <td><span class="badge gray">Low</span></td>
+          </tr>
+          
+          <tr>
+            <td><a href="https://github.com/potench/awesome" target="_blank">awesome</a></td>
+            <td>—</td>
+            <td>0</td>
+            <td class="mono">2020-02-04T18:48:53Z</td>
+            <td><span class="badge gray">NO</span></td>
+            <td><span class="badge gray">Low</span></td>
+          </tr>
+          
+          <tr>
+            <td><a href="https://github.com/potench/cmp" target="_blank">cmp</a></td>
+            <td>JavaScript</td>
+            <td>0</td>
+            <td class="mono">2021-10-01T18:13:46Z</td>
+            <td><span class="badge gray">NO</span></td>
+            <td><span class="badge gray">Low</span></td>
+          </tr>
+          
+          <tr>
+            <td><a href="https://github.com/potench/COVID-19" target="_blank">COVID-19</a></td>
+            <td>—</td>
+            <td>0</td>
+            <td class="mono">2020-04-13T02:44:39Z</td>
+            <td><span class="badge gray">NO</span></td>
+            <td><span class="badge gray">Low</span></td>
+          </tr>
+          
+          <tr>
+            <td><a href="https://github.com/potench/distancing-data" target="_blank">distancing-data</a></td>
+            <td>HTML</td>
+            <td>1</td>
+            <td class="mono">2023-05-10T06:30:00Z</td>
+            <td><span class="badge gray">NO</span></td>
+            <td><span class="badge gray">Low</span></td>
+          </tr>
+          
+          <tr>
+            <td><a href="https://github.com/potench/flow-typed" target="_blank">flow-typed</a></td>
+            <td>JavaScript</td>
+            <td>0</td>
+            <td class="mono">2018-11-29T17:24:23Z</td>
+            <td><span class="badge gray">NO</span></td>
+            <td><span class="badge gray">Low</span></td>
+          </tr>
+          
+          <tr>
+            <td><a href="https://github.com/potench/grouch" target="_blank">grouch</a></td>
+            <td>—</td>
+            <td>0</td>
+            <td class="mono">2018-02-15T05:33:34Z</td>
+            <td><span class="badge gray">NO</span></td>
+            <td><span class="badge gray">Low</span></td>
+          </tr>
+          
+          <tr>
+            <td><a href="https://github.com/potench/headerbid-expert" target="_blank">headerbid-expert</a></td>
+            <td>JavaScript</td>
+            <td>0</td>
+            <td class="mono">2019-01-24T03:07:25Z</td>
+            <td><span class="badge gray">NO</span></td>
+            <td><span class="badge gray">Low</span></td>
+          </tr>
+          
+          <tr>
+            <td><a href="https://github.com/potench/Jcrop" target="_blank">Jcrop</a></td>
+            <td>JavaScript</td>
+            <td>0</td>
+            <td class="mono">2013-07-18T00:38:30Z</td>
+            <td><span class="badge gray">NO</span></td>
+            <td><span class="badge gray">Low</span></td>
+          </tr>
+          
+          <tr>
+            <td><a href="https://github.com/potench/jquery-modules" target="_blank">jquery-modules</a></td>
+            <td>JavaScript</td>
+            <td>0</td>
+            <td class="mono">2012-05-29T23:46:44Z</td>
+            <td><span class="badge gray">NO</span></td>
+            <td><span class="badge gray">Low</span></td>
+          </tr>
+          
+        </tbody>
+      </table>
+      
+
+      <h3 class="subsection-title">Secrets</h3>
+      
+      <p><span class="badge green">No secrets detected in scanned repositories.</span></p>
+      
+      
+    </section>
+
+    <section id="email-intelligence" class="card">
+      <h2>Email Intelligence</h2>
+      
+      <table>
+        <tbody>
+          <tr><th>Email Address</th><td class="value mono">security@shopify.com</td></tr>
+          <tr><th>Domain</th><td>shopify.com</td></tr>
+          <tr><th>Format Valid</th><td><span class="badge green">✓ Valid</span></td></tr>
+          <tr><th>Mail Provider</th><td>Google Workspace</td></tr>
+          <tr><th>Is Disposable</th><td><span class="badge green">No</span></td></tr>
+          <tr><th>MX Records</th><td>alt1.aspmx.l.google.com, alt2.aspmx.l.google.com, alt3.aspmx.l.google.com, alt4.aspmx.l.google.com, aspmx.l.google.com</td></tr>
+          <tr>
+            <th>SMTP Verified</th>
+            <td>
+              <span class="badge green">VERIFIED</span>
+              
+              <span title="SMTP VRFY is disabled by most mail servers. UNKNOWN is the expected result and does not indicate an error in this tool.">ℹ</span>
+            </td>
+          </tr>
+          <tr><th>SPF Present</th><td><span class="badge green">✓ Present</span></td></tr>
+        </tbody>
+      </table>
+      
+      
+    </section>
+
+    <section id="social-footprint" class="card">
+      <h2>Social Footprint</h2>
+      
+      <p>Username variants checked: tobi, security</p>
+      <div class="grid-4">
+        
+          
+            
+          
+          <a class="platform-badge green" href="https://github.com/tobi" target="_blank" title="Public profile page responded with HTTP 200.">
+            GitHub
+            <small>EXPOSED</small>
+            
+          </a>
+        
+          
+            
+          
+          <a class="platform-badge green" href="https://gitlab.com/security" target="_blank" title="Public profile page responded with HTTP 200.">
+            GitLab
+            <small>EXPOSED</small>
+            
+          </a>
+        
+          
+            
+          
+          <a class="platform-badge yellow" href="https://www.npmjs.com/~tobi" target="_blank" title="Access restricted (HTTP 403).">
+            NPM
+            <small>UNKNOWN</small>
+            
+            <small class="muted">Access restricted (HTTP 403).</small>
+            
+          </a>
+        
+          
+            
+          
+          <a class="platform-badge yellow" href="https://pypi.org/user/tobi/" target="_blank" title="Challenge or anti-bot page detected on HTTP 200 response.">
+            PyPI
+            <small>UNKNOWN</small>
+            
+            <small class="muted">Challenge or anti-bot page detected on HTTP 200 response.</small>
+            
+          </a>
+        
+          
+            
+          
+          <a class="platform-badge gray" href="https://hub.docker.com/u/tobi" target="_blank" title="Profile-not-found markers detected in page content.">
+            Docker Hub
+            <small>NOT_FOUND</small>
+            
+            <small class="muted">Profile-not-found markers detected in page content.</small>
+            
+          </a>
+        
+          
+            
+          
+          <a class="platform-badge green" href="https://hackerone.com/tobi" target="_blank" title="Public profile page responded with HTTP 200.">
+            HackerOne
+            <small>EXPOSED</small>
+            
+          </a>
+        
+          
+            
+          
+          <a class="platform-badge green" href="https://bugcrowd.com/h/tobi" target="_blank" title="Public profile page responded with HTTP 200.">
+            Bugcrowd
+            <small>EXPOSED</small>
+            
+          </a>
+        
+          
+            
+          
+          <a class="platform-badge yellow" href="https://www.linkedin.com/in/tobi" target="_blank" title="LinkedIn anti-bot response (HTTP 999) blocked passive verification; manual browser verification is required.">
+            LinkedIn
+            <small>UNKNOWN</small>
+            
+            <small class="muted">LinkedIn anti-bot response (HTTP 999) blocked passive verification; manual browser verification is required.</small>
+            
+          </a>
+        
+          
+            
+          
+          <a class="platform-badge green" href="https://dev.to/tobi" target="_blank" title="Public profile page responded with HTTP 200.">
+            Dev.to
+            <small>EXPOSED</small>
+            
+          </a>
+        
+          
+            
+          
+          <a class="platform-badge yellow" href="https://x.com/tobi" target="_blank" title="Network timeout/client error while probing profile URL.">
+            Twitter/X
+            <small>UNKNOWN</small>
+            
+            <small class="muted">Network timeout/client error while probing profile URL.</small>
+            
+          </a>
+        
+          
+            
+          
+          <a class="platform-badge yellow" href="https://medium.com/@tobi" target="_blank" title="Access restricted (HTTP 403).">
+            Medium
+            <small>UNKNOWN</small>
+            
+            <small class="muted">Access restricted (HTTP 403).</small>
+            
+          </a>
+        
+          
+            
+          
+          <a class="platform-badge green" href="https://news.ycombinator.com/user?id=tobi" target="_blank" title="Public profile page responded with HTTP 200.">
+            HackerNews
+            <small>EXPOSED</small>
+            
+          </a>
+        
+          
+            
+          
+          <a class="platform-badge green" href="https://keybase.io/tobi" target="_blank" title="Public profile page responded with HTTP 200.">
+            Keybase
+            <small>EXPOSED</small>
+            
+          </a>
+        
+          
+            
+          
+          <a class="platform-badge gray" href="https://www.gravatar.com/avatar/25fd01fb6accb95b378e8f24bcaac7b6?d=404" target="_blank" title="HTTP 404 Not Found.">
+            Gravatar
+            <small>NOT_FOUND</small>
+            
+            <small class="muted">HTTP 404 Not Found.</small>
+            
+          </a>
+        
+      </div>
+
+      <h3 class="subsection-title">Positive Signals</h3>
+      
+      
+        
+        <p><a href="https://hackerone.com/tobi" target="_blank" class="badge cyan">HackerOne — Security Researcher — positive signal.</a></p>
+        
+        <p><a href="https://bugcrowd.com/h/tobi" target="_blank" class="badge cyan">Bugcrowd — Security Researcher — positive signal.</a></p>
+        
+      
+
+      <p>5 platform(s) exposed (2 positive security signals excluded)</p>
+      
+    </section>
+
+    <section id="paste-site-exposure" class="card">
+      <h2>Paste Site Exposure</h2>
+      
+      <div class="alert">⚠️ Email found in 2 public paste(s).</div>
+      <table>
+        <thead>
+          <tr><th>Source</th><th>ID</th><th>Title</th><th>Date</th><th>Email Count</th></tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>Pastebin</td>
+            <td class="mono">Yh7KxP1Q</td>
+            <td>corp dump sample</td>
+            <td>2024-01-20T11:30:00Z</td>
+            <td>1</td>
+          </tr>
+          
+          <tr>
+            <td>Pastebin</td>
+            <td class="mono">M9kq2ZaR</td>
+            <td>credentials list</td>
+            <td>2024-08-04T16:05:00Z</td>
+            <td>1</td>
+          </tr>
+          
+        </tbody>
+      </table>
+      
+    </section>
+
+    <section id="js-file-secrets" class="card">
+      <h2>JS File Secrets</h2>
+      
+      <p>Scanned 0 JS file(s).</p>
+      
+      <p><span class="badge green">No secrets detected in scanned JS files.</span></p>
+      
+
+      
+      
+      
+    </section>
+
+    <section id="email-authentication" class="card">
+      <h2>Email Authentication</h2>
+      
+      
+      
+      
+      
+      <table>
+        <thead>
+          <tr><th>Record</th><th>Status</th><th>Detail</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>SPF</td>
+            <td>
+              <span class="badge red">MISSING</span>
+            </td>
+            <td>SOFTFAIL</td>
+          </tr>
+          <tr>
+            <td>DMARC</td>
+            <td>
+              <span class="badge green">REJECT</span>
+              
+            </td>
+            <td>reject | rua=mailto:dmarc-aggregate@shopify.com</td>
+          </tr>
+          <tr>
+            <td>DKIM</td>
+            <td><span class="badge green">FOUND</span></td>
+            <td>2 selector(s) found</td>
+          </tr>
+          <tr>
+            <td>MTA-STS</td>
+            <td>
+              <span class="badge red">MISSING</span>
+            </td>
+            <td>MISSING</td>
+          </tr>
+        </tbody>
+      </table>
+
+      
+      <p><span class="badge green">LOW SPOOFING RISK (2/10)</span></p>
+      
+      
+    </section>
+
+    <section id="document-metadata" class="card">
+      <h2>Document Metadata</h2>
+      
+      <p>Found 0 document(s), scanned 0.</p>
+      
+      <p><span class="badge green">No metadata leaks detected in scanned documents.</span></p>
+      
+      
+    </section>
+
+    <section id="google-dork-recipe" class="card">
+      <h2>Google Dork Recipe</h2>
+      
+      
+      <details class="card" style="margin:10px 0;">
+        <summary><strong>Credential & Token Exposure</strong></summary>
+        <pre><code class="mono">site:pastebin.com "security@shopify.com"
+site:github.com "security@shopify.com" (password OR "api key" OR token)
+site:github.com "shopify.com" (password OR secret OR api_key OR access_token)
+site:gitlab.com "shopify.com" (password OR secret OR token)
+site:stackoverflow.com "security@shopify.com" "api key"
+</code></pre>
+        <p>
+          
+            <span class="badge red">Live hits detected on DuckDuckGo</span>
+          
+        </p>
+        <p class="muted">Paste this query into Google to manually verify.</p>
+      </details>
+      
+      <details class="card" style="margin:10px 0;">
+        <summary><strong>Exposed Configs & Env Files</strong></summary>
+        <pre><code class="mono">site:shopify.com (filetype:env OR inurl:.env)
+site:shopify.com (filetype:yaml OR filetype:yml) (password OR token OR secret)
+site:shopify.com (filetype:json OR filetype:ini) (apikey OR auth OR credential)
+site:github.com "shopify.com" filename:.env
+site:github.com "shopify.com" (filename:config.yml OR filename:settings.py) (secret OR token)
+</code></pre>
+        <p>
+          
+            <span class="badge red">Live hits detected on DuckDuckGo</span>
+          
+        </p>
+        <p class="muted">Paste this query into Google to manually verify.</p>
+      </details>
+      
+      <details class="card" style="margin:10px 0;">
+        <summary><strong>Backups & Archives</strong></summary>
+        <pre><code class="mono">site:shopify.com (ext:bak OR ext:old OR ext:backup OR ext:tmp)
+site:shopify.com (ext:zip OR ext:tar OR ext:gz OR ext:7z) (backup OR database)
+site:shopify.com intitle:"index of" (backup OR dump OR archive)
+site:shopify.com (inurl:backup OR inurl:backups OR inurl:dump)
+</code></pre>
+        <p>
+          
+            <span class="badge gray">Not checked (query-check disabled, capped by limit, or rate blocked)</span>
+          
+        </p>
+        <p class="muted">Paste this query into Google to manually verify.</p>
+      </details>
+      
+      <details class="card" style="margin:10px 0;">
+        <summary><strong>Cloud Storage & Buckets</strong></summary>
+        <pre><code class="mono">site:s3.amazonaws.com "shopify.com"
+site:s3.amazonaws.com "security@shopify.com"
+site:blob.core.windows.net "shopify.com"
+site:storage.googleapis.com "shopify.com"
+site:digitaloceanspaces.com "shopify.com"
+</code></pre>
+        <p>
+          
+            <span class="badge gray">Not checked (query-check disabled, capped by limit, or rate blocked)</span>
+          
+        </p>
+        <p class="muted">Paste this query into Google to manually verify.</p>
+      </details>
+      
+      <details class="card" style="margin:10px 0;">
+        <summary><strong>Admin & Management Surfaces</strong></summary>
+        <pre><code class="mono">site:shopify.com (inurl:admin OR inurl:login OR inurl:dashboard)
+site:shopify.com (inurl:wp-admin OR inurl:phpmyadmin OR inurl:cpanel)
+site:shopify.com (inurl:jenkins OR inurl:grafana OR inurl:kibana)
+site:shopify.com (inurl:swagger OR inurl:api-docs OR inurl:redoc)
+</code></pre>
+        <p>
+          
+            <span class="badge gray">Not checked (query-check disabled, capped by limit, or rate blocked)</span>
+          
+        </p>
+        <p class="muted">Paste this query into Google to manually verify.</p>
+      </details>
+      
+      <details class="card" style="margin:10px 0;">
+        <summary><strong>Error, Debug & Log Leakage</strong></summary>
+        <pre><code class="mono">site:shopify.com ("SQL syntax" OR "stack trace" OR "Traceback")
+site:shopify.com ("Exception" OR "Unhandled" OR "Fatal error")
+site:shopify.com "Index of /" (inurl:logs OR inurl:debug)
+site:shopify.com (filetype:log OR filetype:txt) (error OR exception OR warning)
+</code></pre>
+        <p>
+          
+            <span class="badge gray">Not checked (query-check disabled, capped by limit, or rate blocked)</span>
+          
+        </p>
+        <p class="muted">Paste this query into Google to manually verify.</p>
+      </details>
+      
+      <details class="card" style="margin:10px 0;">
+        <summary><strong>Documents & Sensitive Terms</strong></summary>
+        <pre><code class="mono">site:shopify.com (ext:pdf OR ext:doc OR ext:docx OR ext:xls OR ext:csv)
+site:shopify.com filetype:pdf ("confidential" OR "internal use" OR "do not distribute")
+site:shopify.com ("private key" OR "internal only" OR "restricted") filetype:pdf
+site:shopify.com filetype:xlsx (salary OR payroll OR invoice)
+</code></pre>
+        <p>
+          
+            <span class="badge gray">Not checked (query-check disabled, capped by limit, or rate blocked)</span>
+          
+        </p>
+        <p class="muted">Paste this query into Google to manually verify.</p>
+      </details>
+      
+      <details class="card" style="margin:10px 0;">
+        <summary><strong>CI/CD & DevOps Exposure</strong></summary>
+        <pre><code class="mono">site:shopify.com (.gitlab-ci.yml OR Jenkinsfile OR docker-compose.yml)
+site:github.com "shopify.com" ("workflow" OR "actions") (secret OR token)
+site:shopify.com (inurl:.git OR inurl:.svn)
+site:shopify.com ("npmrc" OR "pypirc" OR "pip.conf") (token OR password)
+</code></pre>
+        <p>
+          
+            <span class="badge gray">Not checked (query-check disabled, capped by limit, or rate blocked)</span>
+          
+        </p>
+        <p class="muted">Paste this query into Google to manually verify.</p>
+      </details>
+      
+      <p class="muted italic">These are passive reconnaissance queries only. Results are informational. Always obtain authorization before investigating any target.</p>
+      
+    </section>
+
+    <section id="shodan-recon" class="card">
+      <h2>Shodan Recon</h2>
+      
+      <table>
+        <thead>
+          <tr><th>IP Address</th><th>Org / ISP</th><th>Country</th><th>Open Ports</th><th>CVEs</th><th>Severity</th></tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td class="mono">23.227.38.33</td>
+            <td>Shopify, Inc.</td>
+            <td>Canada</td>
+            <td class="mono">80, 443, 2052, 2053, 2082, 2083, 2086, 2087, 2095, 2096, 8080, 8443, 8880</td>
+            <td class="mono">—</td>
+            <td>
+              <span class="badge yellow">MEDIUM</span>
+              
+            </td>
+          </tr>
+          
+        </tbody>
+      </table>
+      
+      
+    </section>
+
+    <section id="risk-summary" class="card">
+      <h2>Risk Summary & Recommendations</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>Category</th><th>Risk</th><th>Score Impact</th><th>Recommendation</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>CRED-001</td>
+            <td>Credential Leak</td>
+            <td>
+              <span class="badge red">CRITICAL</span>
+              
+            </td>
+            <td>30</td>
+            <td>Reset passwords and enforce MFA for all affected accounts.</td>
+          </tr>
+          
+          <tr>
+            <td>EMAIL-001</td>
+            <td>Email Intelligence</td>
+            <td>
+              <span class="badge blue">LOW</span>
+              
+            </td>
+            <td>3</td>
+            <td>Use monitored inboxes, anti-abuse rules, and stricter onboarding controls.</td>
+          </tr>
+          
+          <tr>
+            <td>SOC-001</td>
+            <td>Social Footprint</td>
+            <td>
+              <span class="badge yellow">MEDIUM</span>
+              
+            </td>
+            <td>5</td>
+            <td>Review profile privacy and remove unnecessary public identifiers.</td>
+          </tr>
+          
+          <tr>
+            <td>PASTE-001</td>
+            <td>Paste Exposure</td>
+            <td>
+              <span class="badge red">HIGH</span>
+              
+            </td>
+            <td>15</td>
+            <td>Perform credential rotation and monitor paste sites continuously.</td>
+          </tr>
+          
+          <tr>
+            <td>DNS-001</td>
+            <td>Email Authentication</td>
+            <td>
+              <span class="badge blue">LOW</span>
+              
+            </td>
+            <td>4</td>
+            <td>Enforce SPF -all, DMARC reject/quarantine, and operational DKIM selectors.</td>
+          </tr>
+          
+          <tr>
+            <td>DORK-001</td>
+            <td>Search Engine Exposure</td>
+            <td>
+              <span class="badge blue">LOW</span>
+              
+            </td>
+            <td>2</td>
+            <td>Review indexed content and harden access/robots directives where appropriate.</td>
+          </tr>
+          
+          <tr>
+            <td>SHODAN-001</td>
+            <td>Host & Service Exposure</td>
+            <td>
+              <span class="badge blue">LOW</span>
+              
+            </td>
+            <td>4</td>
+            <td>Restrict exposed management/database ports to private networks and review public service hardening.</td>
+          </tr>
+          
+          
+        </tbody>
+      </table>
+    </section>
+
+    <section id="appendix" class="card">
+      <h2>Appendix</h2>
+      <p class="muted">
+        This report was generated passively using publicly available data sources.
+        No unauthorized access was performed. Assessment conducted by Sagar Biswas.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    
+    const breachRows = [{"added_date": "2016-05-18T07:44:00Z", "breach_date": "2012-05-05", "data_classes": ["Email addresses", "Passwords"], "description": "In May 2016, LinkedIn had 164 million email addresses and passwords exposed.", "domain": "linkedin.com", "is_fabricated": false, "is_malware": false, "is_retired": false, "is_sensitive": false, "is_spam_list": false, "is_verified": true, "logo_path": "https://haveibeenpwned.com/Content/Images/PwnedLogos/LinkedIn.png", "modified_date": "2016-05-18T07:44:00Z", "name": "LinkedIn", "pwn_count": 164611595, "severity": "CRITICAL", "title": "LinkedIn"}, {"added_date": "2013-12-04T00:00:00Z", "breach_date": "2013-10-04", "data_classes": ["Email addresses", "Password hints", "Usernames"], "description": "Adobe suffered a major breach exposing usernames, emails and password hints.", "domain": "adobe.com", "is_fabricated": false, "is_malware": false, "is_retired": false, "is_sensitive": false, "is_spam_list": false, "is_verified": true, "logo_path": "https://haveibeenpwned.com/Content/Images/PwnedLogos/Adobe.png", "modified_date": "2013-12-04T00:00:00Z", "name": "Adobe", "pwn_count": 153000000, "severity": "HIGH", "title": "Adobe"}, {"added_date": "2016-08-31T00:00:00Z", "breach_date": "2012-07-01", "data_classes": ["Email addresses", "Passwords"], "description": "Dropbox credentials were exposed from a 2012 breach and surfaced in 2016.", "domain": "dropbox.com", "is_fabricated": false, "is_malware": false, "is_retired": false, "is_sensitive": false, "is_spam_list": false, "is_verified": true, "logo_path": "https://haveibeenpwned.com/Content/Images/PwnedLogos/Dropbox.png", "modified_date": "2016-08-31T00:00:00Z", "name": "Dropbox", "pwn_count": 68648009, "severity": "CRITICAL", "title": "Dropbox"}, {"added_date": "2016-06-01T00:00:00Z", "breach_date": "2008-06-11", "data_classes": ["Email addresses", "Passwords", "Usernames"], "description": "MySpace had hundreds of millions of records exposed including passwords.", "domain": "myspace.com", "is_fabricated": false, "is_malware": false, "is_retired": false, "is_sensitive": false, "is_spam_list": false, "is_verified": true, "logo_path": "https://haveibeenpwned.com/Content/Images/PwnedLogos/MySpace.png", "modified_date": "2016-06-01T00:00:00Z", "name": "MySpace", "pwn_count": 359420698, "severity": "CRITICAL", "title": "MySpace"}];
+    const rowsPerPage = 10;
+    let currentPage = 1;
+    let currentSortKey = "name";
+    let sortDirection = 1;
+
+    function normalize(value) {
+      return String(value ?? "").toLowerCase();
+    }
+
+    function filteredRows() {
+      const searchValue = normalize(document.getElementById("breachSearch").value);
+      const verifiedFilter = document.getElementById("verifiedFilter").value;
+
+      const rows = breachRows.filter((row) => {
+        const matchesSearch =
+          normalize(row.name).includes(searchValue) || normalize(row.domain).includes(searchValue);
+        const matchesVerified =
+          verifiedFilter === "ALL" || String(row.is_verified) === verifiedFilter;
+        return matchesSearch && matchesVerified;
+      });
+
+      rows.sort((a, b) => {
+        const aValue = a[currentSortKey];
+        const bValue = b[currentSortKey];
+        if (aValue === bValue) return 0;
+        return aValue > bValue ? sortDirection : -sortDirection;
+      });
+
+      return rows;
+    }
+
+    function renderTable() {
+      const rows = filteredRows();
+      const tableBody = document.querySelector("#breachTable tbody");
+      tableBody.innerHTML = "";
+
+      const totalPages = Math.max(1, Math.ceil(rows.length / rowsPerPage));
+      currentPage = Math.min(currentPage, totalPages);
+
+      const start = (currentPage - 1) * rowsPerPage;
+      const pagedRows = rows.slice(start, start + rowsPerPage);
+
+      for (const row of pagedRows) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row.name}</td>
+          <td>${row.domain || "—"}</td>
+          <td>${row.breach_date}</td>
+          <td>${(row.data_classes || []).join(", ")}</td>
+          <td>${row.is_verified ? "true" : "false"}</td>
+          <td>${Number(row.pwn_count || 0).toLocaleString()}</td>
+        `;
+        tableBody.appendChild(tr);
+      }
+
+      document.getElementById("pageInfo").textContent = `Page ${currentPage} of ${totalPages}`;
+      document.getElementById("prevPage").disabled = currentPage <= 1;
+      document.getElementById("nextPage").disabled = currentPage >= totalPages;
+    }
+
+    if (document.getElementById("breachTable")) {
+      document.getElementById("breachSearch").addEventListener("input", () => {
+        currentPage = 1;
+        renderTable();
+      });
+
+      document.getElementById("verifiedFilter").addEventListener("change", () => {
+        currentPage = 1;
+        renderTable();
+      });
+
+      document.getElementById("prevPage").addEventListener("click", () => {
+        currentPage -= 1;
+        renderTable();
+      });
+
+      document.getElementById("nextPage").addEventListener("click", () => {
+        currentPage += 1;
+        renderTable();
+      });
+
+      for (const header of document.querySelectorAll("#breachTable th[data-sort]")) {
+        header.style.cursor = "pointer";
+        header.addEventListener("click", () => {
+          const key = header.dataset.sort;
+          if (currentSortKey === key) {
+            sortDirection *= -1;
+          } else {
+            currentSortKey = key;
+            sortDirection = 1;
+          }
+          renderTable();
+        });
+      }
+      renderTable();
+    }
+    
+
+    
+  </script>
+</body>
+</html>

@@ -1,0 +1,880 @@
+{
+  "meta": {
+    "tool_name": "osint-exposure-toolkit",
+    "tool_version": "1.0.0",
+    "generated_at": "2026-03-25T05:54:55.375393+00:00",
+    "target_email": "security@shopify.com",
+    "target_domain": "shopify.com",
+    "score": 63,
+    "label": "HIGH EXPOSURE"
+  },
+  "credential_leak": {
+    "email": "security@shopify.com",
+    "engine": "hibp",
+    "mode": "demo",
+    "leakcheck_mode": null,
+    "leakcheck_sources": [],
+    "leakcheck_found": 0,
+    "skipped": false,
+    "demo_mode": true,
+    "hibp_source": "fixture",
+    "total_breaches": 4,
+    "total_pastes": 2,
+    "total_pwned_accounts": 745680302,
+    "breaches": [
+      {
+        "name": "LinkedIn",
+        "title": "LinkedIn",
+        "domain": "linkedin.com",
+        "breach_date": "2012-05-05",
+        "added_date": "2016-05-18T07:44:00Z",
+        "modified_date": "2016-05-18T07:44:00Z",
+        "pwn_count": 164611595,
+        "description": "In May 2016, LinkedIn had 164 million email addresses and passwords exposed.",
+        "logo_path": "https://haveibeenpwned.com/Content/Images/PwnedLogos/LinkedIn.png",
+        "data_classes": [
+          "Email addresses",
+          "Passwords"
+        ],
+        "is_verified": true,
+        "is_fabricated": false,
+        "is_sensitive": false,
+        "is_retired": false,
+        "is_spam_list": false,
+        "is_malware": false,
+        "severity": "CRITICAL"
+      },
+      {
+        "name": "Adobe",
+        "title": "Adobe",
+        "domain": "adobe.com",
+        "breach_date": "2013-10-04",
+        "added_date": "2013-12-04T00:00:00Z",
+        "modified_date": "2013-12-04T00:00:00Z",
+        "pwn_count": 153000000,
+        "description": "Adobe suffered a major breach exposing usernames, emails and password hints.",
+        "logo_path": "https://haveibeenpwned.com/Content/Images/PwnedLogos/Adobe.png",
+        "data_classes": [
+          "Email addresses",
+          "Password hints",
+          "Usernames"
+        ],
+        "is_verified": true,
+        "is_fabricated": false,
+        "is_sensitive": false,
+        "is_retired": false,
+        "is_spam_list": false,
+        "is_malware": false,
+        "severity": "HIGH"
+      },
+      {
+        "name": "Dropbox",
+        "title": "Dropbox",
+        "domain": "dropbox.com",
+        "breach_date": "2012-07-01",
+        "added_date": "2016-08-31T00:00:00Z",
+        "modified_date": "2016-08-31T00:00:00Z",
+        "pwn_count": 68648009,
+        "description": "Dropbox credentials were exposed from a 2012 breach and surfaced in 2016.",
+        "logo_path": "https://haveibeenpwned.com/Content/Images/PwnedLogos/Dropbox.png",
+        "data_classes": [
+          "Email addresses",
+          "Passwords"
+        ],
+        "is_verified": true,
+        "is_fabricated": false,
+        "is_sensitive": false,
+        "is_retired": false,
+        "is_spam_list": false,
+        "is_malware": false,
+        "severity": "CRITICAL"
+      },
+      {
+        "name": "MySpace",
+        "title": "MySpace",
+        "domain": "myspace.com",
+        "breach_date": "2008-06-11",
+        "added_date": "2016-06-01T00:00:00Z",
+        "modified_date": "2016-06-01T00:00:00Z",
+        "pwn_count": 359420698,
+        "description": "MySpace had hundreds of millions of records exposed including passwords.",
+        "logo_path": "https://haveibeenpwned.com/Content/Images/PwnedLogos/MySpace.png",
+        "data_classes": [
+          "Email addresses",
+          "Passwords",
+          "Usernames"
+        ],
+        "is_verified": true,
+        "is_fabricated": false,
+        "is_sensitive": false,
+        "is_retired": false,
+        "is_spam_list": false,
+        "is_malware": false,
+        "severity": "CRITICAL"
+      }
+    ],
+    "pastes": [
+      {
+        "source": "Pastebin",
+        "identifier": "Yh7KxP1Q",
+        "title": "corp dump sample",
+        "date": "2024-01-20T11:30:00Z",
+        "email_count": 1
+      },
+      {
+        "source": "Pastebin",
+        "identifier": "M9kq2ZaR",
+        "title": "credentials list",
+        "date": "2024-08-04T16:05:00Z",
+        "email_count": 1
+      }
+    ],
+    "overall_severity": "CRITICAL",
+    "note": "Demo Mode — fixture data loaded because HIBP API key is not configured.",
+    "score_impact": 30
+  },
+  "github_footprint": {
+    "skipped": false,
+    "skip_reason": null,
+    "query": "shopify.com",
+    "discovered_entities": [
+      "potench"
+    ],
+    "repositories": [
+      {
+        "name": "amazon-cloudfront-developer-guide",
+        "description": "The open source version of the Amazon CloudFront documentation",
+        "language": null,
+        "stars": 0,
+        "forks": 0,
+        "last_pushed": "2020-12-18T18:21:33Z",
+        "active": false,
+        "has_pages": false,
+        "html_url": "https://github.com/potench/amazon-cloudfront-developer-guide",
+        "commit_hash": "322412269"
+      },
+      {
+        "name": "awesome",
+        "description": "Curated List of Awesome Tools",
+        "language": null,
+        "stars": 0,
+        "forks": 0,
+        "last_pushed": "2020-02-04T18:48:53Z",
+        "active": false,
+        "has_pages": false,
+        "html_url": "https://github.com/potench/awesome",
+        "commit_hash": "238271887"
+      },
+      {
+        "name": "cmp",
+        "description": "Consent Management Platform Reference Implementation",
+        "language": "JavaScript",
+        "stars": 0,
+        "forks": 0,
+        "last_pushed": "2021-10-01T18:13:46Z",
+        "active": false,
+        "has_pages": false,
+        "html_url": "https://github.com/potench/cmp",
+        "commit_hash": "130903150"
+      },
+      {
+        "name": "COVID-19",
+        "description": "Novel Coronavirus (COVID-19) Cases, provided by JHU CSSE",
+        "language": null,
+        "stars": 0,
+        "forks": 0,
+        "last_pushed": "2020-04-13T02:44:39Z",
+        "active": false,
+        "has_pages": false,
+        "html_url": "https://github.com/potench/COVID-19",
+        "commit_hash": "255215038"
+      },
+      {
+        "name": "distancing-data",
+        "description": "Data transforms for regional COVID-19 estimations and predictions",
+        "language": "HTML",
+        "stars": 1,
+        "forks": 0,
+        "last_pushed": "2023-05-10T06:30:00Z",
+        "active": false,
+        "has_pages": false,
+        "html_url": "https://github.com/potench/distancing-data",
+        "commit_hash": "253115990"
+      },
+      {
+        "name": "flow-typed",
+        "description": "A central repository for Flow library definitions",
+        "language": "JavaScript",
+        "stars": 0,
+        "forks": 0,
+        "last_pushed": "2018-11-29T17:24:23Z",
+        "active": false,
+        "has_pages": false,
+        "html_url": "https://github.com/potench/flow-typed",
+        "commit_hash": "151152152"
+      },
+      {
+        "name": "grouch",
+        "description": "An Oscars voting application built in react-native for ios, android, and web.",
+        "language": null,
+        "stars": 0,
+        "forks": 0,
+        "last_pushed": "2018-02-15T05:33:34Z",
+        "active": false,
+        "has_pages": false,
+        "html_url": "https://github.com/potench/grouch",
+        "commit_hash": "121594762"
+      },
+      {
+        "name": "headerbid-expert",
+        "description": null,
+        "language": "JavaScript",
+        "stars": 0,
+        "forks": 0,
+        "last_pushed": "2019-01-24T03:07:25Z",
+        "active": false,
+        "has_pages": false,
+        "html_url": "https://github.com/potench/headerbid-expert",
+        "commit_hash": "167292805"
+      },
+      {
+        "name": "Jcrop",
+        "description": "Jcrop (official) - Image Cropping Plugin for jQuery",
+        "language": "JavaScript",
+        "stars": 0,
+        "forks": 0,
+        "last_pushed": "2013-07-18T00:38:30Z",
+        "active": false,
+        "has_pages": false,
+        "html_url": "https://github.com/potench/Jcrop",
+        "commit_hash": "11481783"
+      },
+      {
+        "name": "jquery-modules",
+        "description": "Random jQuery modules that I tend to use a lot.",
+        "language": "JavaScript",
+        "stars": 0,
+        "forks": 0,
+        "last_pushed": "2012-05-29T23:46:44Z",
+        "active": false,
+        "has_pages": false,
+        "html_url": "https://github.com/potench/jquery-modules",
+        "commit_hash": "3861496"
+      }
+    ],
+    "secrets_found": [],
+    "overall_severity": "INFO",
+    "score_impact": 0
+  },
+  "email_intel": {
+    "skipped": false,
+    "skip_reason": null,
+    "email": "security@shopify.com",
+    "domain": "shopify.com",
+    "format_valid": true,
+    "mx_records": [
+      "alt1.aspmx.l.google.com",
+      "alt2.aspmx.l.google.com",
+      "alt3.aspmx.l.google.com",
+      "alt4.aspmx.l.google.com",
+      "aspmx.l.google.com"
+    ],
+    "mail_provider": "Google Workspace",
+    "is_disposable": false,
+    "spf_present": true,
+    "smtp_verified": "VERIFIED",
+    "score_impact": 3
+  },
+  "social_footprint": {
+    "skipped": false,
+    "skip_reason": null,
+    "email": "security@shopify.com",
+    "username_variants": [
+      "tobi",
+      "security"
+    ],
+    "profiles": [
+      {
+        "platform": "GitHub",
+        "url": "https://github.com/tobi",
+        "status": "EXPOSED",
+        "status_reason": "Public profile page responded with HTTP 200.",
+        "username_tried": "tobi",
+        "is_positive_signal": false
+      },
+      {
+        "platform": "GitLab",
+        "url": "https://gitlab.com/security",
+        "status": "EXPOSED",
+        "status_reason": "Public profile page responded with HTTP 200.",
+        "username_tried": "security",
+        "is_positive_signal": false
+      },
+      {
+        "platform": "NPM",
+        "url": "https://www.npmjs.com/~tobi",
+        "status": "UNKNOWN",
+        "status_reason": "Access restricted (HTTP 403).",
+        "username_tried": "tobi",
+        "is_positive_signal": false
+      },
+      {
+        "platform": "PyPI",
+        "url": "https://pypi.org/user/tobi/",
+        "status": "UNKNOWN",
+        "status_reason": "Challenge or anti-bot page detected on HTTP 200 response.",
+        "username_tried": "tobi",
+        "is_positive_signal": false
+      },
+      {
+        "platform": "Docker Hub",
+        "url": "https://hub.docker.com/u/tobi",
+        "status": "NOT_FOUND",
+        "status_reason": "Profile-not-found markers detected in page content.",
+        "username_tried": "tobi",
+        "is_positive_signal": false
+      },
+      {
+        "platform": "HackerOne",
+        "url": "https://hackerone.com/tobi",
+        "status": "EXPOSED",
+        "status_reason": "Public profile page responded with HTTP 200.",
+        "username_tried": "tobi",
+        "is_positive_signal": true
+      },
+      {
+        "platform": "Bugcrowd",
+        "url": "https://bugcrowd.com/h/tobi",
+        "status": "EXPOSED",
+        "status_reason": "Public profile page responded with HTTP 200.",
+        "username_tried": "tobi",
+        "is_positive_signal": true
+      },
+      {
+        "platform": "LinkedIn",
+        "url": "https://www.linkedin.com/in/tobi",
+        "status": "UNKNOWN",
+        "status_reason": "LinkedIn anti-bot response (HTTP 999) blocked passive verification; manual browser verification is required.",
+        "username_tried": "tobi",
+        "is_positive_signal": false
+      },
+      {
+        "platform": "Dev.to",
+        "url": "https://dev.to/tobi",
+        "status": "EXPOSED",
+        "status_reason": "Public profile page responded with HTTP 200.",
+        "username_tried": "tobi",
+        "is_positive_signal": false
+      },
+      {
+        "platform": "Twitter/X",
+        "url": "https://x.com/tobi",
+        "status": "UNKNOWN",
+        "status_reason": "Network timeout/client error while probing profile URL.",
+        "username_tried": "tobi",
+        "is_positive_signal": false
+      },
+      {
+        "platform": "Medium",
+        "url": "https://medium.com/@tobi",
+        "status": "UNKNOWN",
+        "status_reason": "Access restricted (HTTP 403).",
+        "username_tried": "tobi",
+        "is_positive_signal": false
+      },
+      {
+        "platform": "HackerNews",
+        "url": "https://news.ycombinator.com/user?id=tobi",
+        "status": "EXPOSED",
+        "status_reason": "Public profile page responded with HTTP 200.",
+        "username_tried": "tobi",
+        "is_positive_signal": false
+      },
+      {
+        "platform": "Keybase",
+        "url": "https://keybase.io/tobi",
+        "status": "EXPOSED",
+        "status_reason": "Public profile page responded with HTTP 200.",
+        "username_tried": "tobi",
+        "is_positive_signal": false
+      },
+      {
+        "platform": "Gravatar",
+        "url": "https://www.gravatar.com/avatar/25fd01fb6accb95b378e8f24bcaac7b6?d=404",
+        "status": "NOT_FOUND",
+        "status_reason": "HTTP 404 Not Found.",
+        "username_tried": null,
+        "is_positive_signal": false
+      }
+    ],
+    "total_exposure_count": 5,
+    "positive_signal_count": 2,
+    "score_impact": 5
+  },
+  "paste_monitor": {
+    "mode": "premium",
+    "total_pastes": 2,
+    "pastes": [
+      {
+        "source": "Pastebin",
+        "identifier": "Yh7KxP1Q",
+        "title": "corp dump sample",
+        "date": "2024-01-20T11:30:00Z",
+        "email_count": 1
+      },
+      {
+        "source": "Pastebin",
+        "identifier": "M9kq2ZaR",
+        "title": "credentials list",
+        "date": "2024-08-04T16:05:00Z",
+        "email_count": 1
+      }
+    ],
+    "message": null,
+    "score_impact": 15
+  },
+  "js_secret_scanner": {
+    "skipped": false,
+    "skip_reason": null,
+    "domain": "shopify.com",
+    "js_files_scanned": 0,
+    "secrets_found": [],
+    "internal_endpoints_found": [],
+    "environment_hints": [],
+    "score_impact": 0
+  },
+  "dns_email_auth": {
+    "domain": "shopify.com",
+    "skipped": false,
+    "skip_reason": null,
+    "spf": {
+      "present": true,
+      "record": "v=spf1 include:_spf.google.com include:mail.zendesk.com include:sendgrid.net ~all",
+      "strength": "SOFTFAIL",
+      "over_lookup_limit": false
+    },
+    "dmarc": {
+      "present": true,
+      "record": "v=DMARC1; p=reject; pct=100; fo=1; rua=mailto:dmarc-aggregate@shopify.com;ruf=mailto:dmarc-reports@shopify.com",
+      "policy": "reject",
+      "rua": "mailto:dmarc-aggregate@shopify.com",
+      "ruf": "mailto:dmarc-reports@shopify.com",
+      "aspf": null,
+      "adkim": null
+    },
+    "dkim": {
+      "selectors_found": [
+        "google",
+        "mail"
+      ],
+      "weak_selectors": []
+    },
+    "mta_sts": {
+      "present": false,
+      "mode": null
+    },
+    "spoofability_score": 2,
+    "score_impact": 4
+  },
+  "metadata_extractor": {
+    "skipped": false,
+    "skip_reason": null,
+    "domain": "shopify.com",
+    "documents_found": 0,
+    "documents_scanned": 0,
+    "findings": [],
+    "unique_authors": [],
+    "internal_software": [],
+    "score_impact": 0
+  },
+  "google_dorks": {
+    "skipped": false,
+    "skip_reason": null,
+    "results": [
+      {
+        "category": "Credential & Token Exposure",
+        "queries": [
+          "site:pastebin.com \"security@shopify.com\"",
+          "site:github.com \"security@shopify.com\" (password OR \"api key\" OR token)",
+          "site:github.com \"shopify.com\" (password OR secret OR api_key OR access_token)",
+          "site:gitlab.com \"shopify.com\" (password OR secret OR token)",
+          "site:stackoverflow.com \"security@shopify.com\" \"api key\""
+        ],
+        "ddg_result": "RESULTS_FOUND"
+      },
+      {
+        "category": "Exposed Configs & Env Files",
+        "queries": [
+          "site:shopify.com (filetype:env OR inurl:.env)",
+          "site:shopify.com (filetype:yaml OR filetype:yml) (password OR token OR secret)",
+          "site:shopify.com (filetype:json OR filetype:ini) (apikey OR auth OR credential)",
+          "site:github.com \"shopify.com\" filename:.env",
+          "site:github.com \"shopify.com\" (filename:config.yml OR filename:settings.py) (secret OR token)"
+        ],
+        "ddg_result": "RESULTS_FOUND"
+      },
+      {
+        "category": "Backups & Archives",
+        "queries": [
+          "site:shopify.com (ext:bak OR ext:old OR ext:backup OR ext:tmp)",
+          "site:shopify.com (ext:zip OR ext:tar OR ext:gz OR ext:7z) (backup OR database)",
+          "site:shopify.com intitle:\"index of\" (backup OR dump OR archive)",
+          "site:shopify.com (inurl:backup OR inurl:backups OR inurl:dump)"
+        ],
+        "ddg_result": "NOT_CHECKED"
+      },
+      {
+        "category": "Cloud Storage & Buckets",
+        "queries": [
+          "site:s3.amazonaws.com \"shopify.com\"",
+          "site:s3.amazonaws.com \"security@shopify.com\"",
+          "site:blob.core.windows.net \"shopify.com\"",
+          "site:storage.googleapis.com \"shopify.com\"",
+          "site:digitaloceanspaces.com \"shopify.com\""
+        ],
+        "ddg_result": "NOT_CHECKED"
+      },
+      {
+        "category": "Admin & Management Surfaces",
+        "queries": [
+          "site:shopify.com (inurl:admin OR inurl:login OR inurl:dashboard)",
+          "site:shopify.com (inurl:wp-admin OR inurl:phpmyadmin OR inurl:cpanel)",
+          "site:shopify.com (inurl:jenkins OR inurl:grafana OR inurl:kibana)",
+          "site:shopify.com (inurl:swagger OR inurl:api-docs OR inurl:redoc)"
+        ],
+        "ddg_result": "NOT_CHECKED"
+      },
+      {
+        "category": "Error, Debug & Log Leakage",
+        "queries": [
+          "site:shopify.com (\"SQL syntax\" OR \"stack trace\" OR \"Traceback\")",
+          "site:shopify.com (\"Exception\" OR \"Unhandled\" OR \"Fatal error\")",
+          "site:shopify.com \"Index of /\" (inurl:logs OR inurl:debug)",
+          "site:shopify.com (filetype:log OR filetype:txt) (error OR exception OR warning)"
+        ],
+        "ddg_result": "NOT_CHECKED"
+      },
+      {
+        "category": "Documents & Sensitive Terms",
+        "queries": [
+          "site:shopify.com (ext:pdf OR ext:doc OR ext:docx OR ext:xls OR ext:csv)",
+          "site:shopify.com filetype:pdf (\"confidential\" OR \"internal use\" OR \"do not distribute\")",
+          "site:shopify.com (\"private key\" OR \"internal only\" OR \"restricted\") filetype:pdf",
+          "site:shopify.com filetype:xlsx (salary OR payroll OR invoice)"
+        ],
+        "ddg_result": "NOT_CHECKED"
+      },
+      {
+        "category": "CI/CD & DevOps Exposure",
+        "queries": [
+          "site:shopify.com (.gitlab-ci.yml OR Jenkinsfile OR docker-compose.yml)",
+          "site:github.com \"shopify.com\" (\"workflow\" OR \"actions\") (secret OR token)",
+          "site:shopify.com (inurl:.git OR inurl:.svn)",
+          "site:shopify.com (\"npmrc\" OR \"pypirc\" OR \"pip.conf\") (token OR password)"
+        ],
+        "ddg_result": "NOT_CHECKED"
+      }
+    ],
+    "ddg_checks_performed": 3,
+    "score_impact": 2
+  },
+  "shodan": {
+    "skipped": false,
+    "skip_reason": null,
+    "target_domain": "shopify.com",
+    "resolved_ips": [
+      "23.227.38.33"
+    ],
+    "hosts": [
+      {
+        "ip_str": "23.227.38.33",
+        "hostnames": [
+          "checkout.shopify.com",
+          "myshopify.com"
+        ],
+        "org": "Shopify, Inc.",
+        "country_name": "Canada",
+        "isp": "Cloudflare, Inc.",
+        "last_update": "2026-03-25T02:04:12.896158",
+        "open_ports": [
+          80,
+          443,
+          2052,
+          2053,
+          2082,
+          2083,
+          2086,
+          2087,
+          2095,
+          2096,
+          8080,
+          8443,
+          8880
+        ],
+        "services": [
+          {
+            "port": 80,
+            "transport": "tcp",
+            "product": "CloudFlare",
+            "version": null,
+            "banner_excerpt": "HTTP/1.1 403 ForbiddenDate: Wed, 25 Mar 2026 02:04:12 GMTContent-Type: text/html; charset=UTF-8Content-Length: 6235Connection: closeX-Frame-Options: SAMEORIGINReferrer-Policy: same-originCache-Control",
+            "cpe": [
+              "cpe:/a:cloudflare:cloudflare"
+            ],
+            "ssl_subject": null,
+            "http_title": "Direct IP access not allowed | Cloudflare",
+            "severity": "LOW"
+          },
+          {
+            "port": 443,
+            "transport": "tcp",
+            "product": "CloudFlare",
+            "version": null,
+            "banner_excerpt": "HTTP/1.1 403 ForbiddenServer: cloudflareDate: Tue, 24 Mar 2026 21:54:33 GMTContent-Type: text/htmlContent-Length: 553Connection: keep-aliveCF-RAY: 9e18ea3dce2b2cab-DFW",
+            "cpe": [
+              "cpe:/a:cloudflare:cloudflare"
+            ],
+            "ssl_subject": "*.myshopify.com",
+            "http_title": "403 Forbidden",
+            "severity": "LOW"
+          },
+          {
+            "port": 2052,
+            "transport": "tcp",
+            "product": null,
+            "version": null,
+            "banner_excerpt": "HTTP/1.1 403 ForbiddenDate: Fri, 20 Mar 2026 16:38:40 GMTContent-Type: text/html; charset=UTF-8Content-Length: 6236Connection: closeX-Frame-Options: SAMEORIGINReferrer-Policy: same-originCache-Control",
+            "cpe": [
+              "cpe:/a:cloudflare:cloudflare"
+            ],
+            "ssl_subject": null,
+            "http_title": "Direct IP access not allowed | Cloudflare",
+            "severity": "LOW"
+          },
+          {
+            "port": 2053,
+            "transport": "tcp",
+            "product": null,
+            "version": null,
+            "banner_excerpt": "HTTP/1.1 400 Bad RequestServer: cloudflareDate: Sat, 07 Mar 2026 13:37:44 GMTContent-Type: text/htmlContent-Length: 655Connection: closeCF-RAY: -",
+            "cpe": [
+              "cpe:/a:cloudflare:cloudflare"
+            ],
+            "ssl_subject": null,
+            "http_title": "400 The plain HTTP request was sent to HTTPS port",
+            "severity": "LOW"
+          },
+          {
+            "port": 2082,
+            "transport": "tcp",
+            "product": null,
+            "version": null,
+            "banner_excerpt": "HTTP/1.1 403 ForbiddenDate: Tue, 24 Mar 2026 19:12:03 GMTContent-Type: text/html; charset=UTF-8Content-Length: 6235Connection: closeX-Frame-Options: SAMEORIGINReferrer-Policy: same-originCache-Control",
+            "cpe": [
+              "cpe:/a:cloudflare:cloudflare"
+            ],
+            "ssl_subject": null,
+            "http_title": "Direct IP access not allowed | Cloudflare",
+            "severity": "LOW"
+          },
+          {
+            "port": 2083,
+            "transport": "tcp",
+            "product": null,
+            "version": null,
+            "banner_excerpt": "HTTP/1.1 403 ForbiddenServer: cloudflareDate: Wed, 25 Mar 2026 01:28:10 GMTContent-Type: text/htmlContent-Length: 553Connection: keep-aliveCF-RAY: 9e1a23284da4bc84-DFW",
+            "cpe": [
+              "cpe:/a:cloudflare:cloudflare"
+            ],
+            "ssl_subject": "*.myshopify.com",
+            "http_title": "403 Forbidden",
+            "severity": "LOW"
+          },
+          {
+            "port": 2086,
+            "transport": "tcp",
+            "product": null,
+            "version": null,
+            "banner_excerpt": "HTTP/1.1 403 ForbiddenDate: Wed, 25 Mar 2026 00:56:22 GMTContent-Type: text/html; charset=UTF-8Content-Length: 6233Connection: closeX-Frame-Options: SAMEORIGINReferrer-Policy: same-originCache-Control",
+            "cpe": [
+              "cpe:/a:cloudflare:cloudflare"
+            ],
+            "ssl_subject": null,
+            "http_title": "Direct IP access not allowed | Cloudflare",
+            "severity": "LOW"
+          },
+          {
+            "port": 2087,
+            "transport": "tcp",
+            "product": null,
+            "version": null,
+            "banner_excerpt": "HTTP/1.1 400 Bad RequestServer: cloudflareDate: Wed, 25 Mar 2026 00:04:29 GMTContent-Type: text/htmlContent-Length: 155Connection: closeCF-RAY: -<html><head><title>400 Bad Request</title></head><body>",
+            "cpe": [],
+            "ssl_subject": null,
+            "http_title": null,
+            "severity": "LOW"
+          },
+          {
+            "port": 2095,
+            "transport": "tcp",
+            "product": null,
+            "version": null,
+            "banner_excerpt": "HTTP/1.1 403 ForbiddenDate: Wed, 18 Mar 2026 04:30:30 GMTContent-Type: text/html; charset=UTF-8Content-Length: 6236Connection: closeX-Frame-Options: SAMEORIGINReferrer-Policy: same-originCache-Control",
+            "cpe": [
+              "cpe:/a:cloudflare:cloudflare"
+            ],
+            "ssl_subject": null,
+            "http_title": "Direct IP access not allowed | Cloudflare",
+            "severity": "LOW"
+          },
+          {
+            "port": 2096,
+            "transport": "tcp",
+            "product": null,
+            "version": null,
+            "banner_excerpt": "HTTP/1.1 400 Bad RequestServer: cloudflareDate: Tue, 24 Mar 2026 20:51:08 GMTContent-Type: text/htmlContent-Length: 655Connection: closeCF-RAY: -",
+            "cpe": [
+              "cpe:/a:cloudflare:cloudflare"
+            ],
+            "ssl_subject": null,
+            "http_title": "400 The plain HTTP request was sent to HTTPS port",
+            "severity": "LOW"
+          },
+          {
+            "port": 8080,
+            "transport": "tcp",
+            "product": "CloudFlare",
+            "version": null,
+            "banner_excerpt": "HTTP/1.1 403 ForbiddenDate: Tue, 24 Mar 2026 19:59:55 GMTContent-Type: text/html; charset=UTF-8Content-Length: 6234Connection: closeX-Frame-Options: SAMEORIGINReferrer-Policy: same-originCache-Control",
+            "cpe": [
+              "cpe:/a:cloudflare:cloudflare"
+            ],
+            "ssl_subject": null,
+            "http_title": "Direct IP access not allowed | Cloudflare",
+            "severity": "MEDIUM"
+          },
+          {
+            "port": 8443,
+            "transport": "tcp",
+            "product": "CloudFlare",
+            "version": null,
+            "banner_excerpt": "HTTP/1.1 403 ForbiddenServer: cloudflareDate: Tue, 24 Mar 2026 23:18:15 GMTContent-Type: text/htmlContent-Length: 553Connection: keep-aliveCF-RAY: 9e1964d9ab451dee-DFW",
+            "cpe": [
+              "cpe:/a:cloudflare:cloudflare"
+            ],
+            "ssl_subject": "*.myshopify.com",
+            "http_title": "403 Forbidden",
+            "severity": "MEDIUM"
+          },
+          {
+            "port": 8880,
+            "transport": "tcp",
+            "product": null,
+            "version": null,
+            "banner_excerpt": "HTTP/1.1 403 ForbiddenDate: Tue, 24 Mar 2026 17:32:42 GMTContent-Type: text/plain; charset=UTF-8Content-Length: 16Connection: closeX-Frame-Options: SAMEORIGINReferrer-Policy: same-originCache-Control:",
+            "cpe": [],
+            "ssl_subject": null,
+            "http_title": null,
+            "severity": "LOW"
+          }
+        ],
+        "vulns": [],
+        "tags": [
+          "cdn"
+        ],
+        "overall_severity": "MEDIUM"
+      }
+    ],
+    "total_open_ports": 13,
+    "total_cves": 0,
+    "unique_cves": [],
+    "critical_findings": 0,
+    "high_findings": 0,
+    "medium_findings": 2,
+    "overall_severity": "MEDIUM",
+    "score_impact": 4
+  },
+  "findings": [
+    {
+      "id": "CRED-001",
+      "module": "credential_leak",
+      "category": "Credential Leak",
+      "risk": "CRITICAL",
+      "title": "Breaches associated with target",
+      "description": "Found 4 breach records linked to the credential source.",
+      "recommendation": "Reset passwords and enforce MFA for all affected accounts.",
+      "score_impact": 30,
+      "references": [
+        "https://haveibeenpwned.com/"
+      ]
+    },
+    {
+      "id": "EMAIL-001",
+      "module": "email_intel",
+      "category": "Email Intelligence",
+      "risk": "LOW",
+      "title": "Mailbox exposure indicators",
+      "description": "Email validation and SMTP behavior indicate exposure-relevant mailbox posture.",
+      "recommendation": "Use monitored inboxes, anti-abuse rules, and stricter onboarding controls.",
+      "score_impact": 3,
+      "references": []
+    },
+    {
+      "id": "SOC-001",
+      "module": "social_footprint",
+      "category": "Social Footprint",
+      "risk": "MEDIUM",
+      "title": "Public profile exposure",
+      "description": "Detected 5 exposed non-positive-signal social profiles.",
+      "recommendation": "Review profile privacy and remove unnecessary public identifiers.",
+      "score_impact": 5,
+      "references": []
+    },
+    {
+      "id": "PASTE-001",
+      "module": "paste_monitor",
+      "category": "Paste Exposure",
+      "risk": "HIGH",
+      "title": "Credential references in public pastes",
+      "description": "Found 2 public paste references tied to the target.",
+      "recommendation": "Perform credential rotation and monitor paste sites continuously.",
+      "score_impact": 15,
+      "references": []
+    },
+    {
+      "id": "DNS-001",
+      "module": "dns_email_auth",
+      "category": "Email Authentication",
+      "risk": "LOW",
+      "title": "Spoofability risk",
+      "description": "Domain spoofability score is 2/10.",
+      "recommendation": "Enforce SPF -all, DMARC reject/quarantine, and operational DKIM selectors.",
+      "score_impact": 4,
+      "references": []
+    },
+    {
+      "id": "DORK-001",
+      "module": "google_dorks",
+      "category": "Search Engine Exposure",
+      "risk": "LOW",
+      "title": "Public search result exposure signals",
+      "description": "DuckDuckGo checks found potentially indexed exposure-relevant results.",
+      "recommendation": "Review indexed content and harden access/robots directives where appropriate.",
+      "score_impact": 2,
+      "references": []
+    },
+    {
+      "id": "SHODAN-001",
+      "module": "shodan_recon",
+      "category": "Host & Service Exposure",
+      "risk": "LOW",
+      "title": "Critical internet-facing service exposure detected",
+      "description": "Shodan identified 13 open ports across 1 resolved hosts.",
+      "recommendation": "Restrict exposed management/database ports to private networks and review public service hardening.",
+      "score_impact": 4,
+      "references": [
+        "https://www.shodan.io/"
+      ]
+    }
+  ]
+}

@@ -32,6 +32,7 @@ async def test_html_report_smoke(mock_all_results) -> None:
         "Appendix",
     ]:
         assert section_name in content
+    assert "const breachRows =" in content
 
 
 async def test_json_report_smoke(mock_all_results) -> None:

@@ -4,7 +4,6 @@ dist/
 build/
 *.egg-info/
 pip-wheel-metadata/
-output/
 __pycache__/
 **/__pycache__/
 *.py[cod]
@@ -33,4 +32,3 @@ nosetests.xml
 *.log
 .DS_Store
 .ipynb_checkpoints/
-.config.yaml
