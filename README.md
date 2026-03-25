@@ -1,13 +1,49 @@
 # OSINT Exposure Toolkit
 
+<div align="right">
+
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
+
+</div>
 
 Passive, ethical OSINT toolkit for one practical question:
 
 **How exposed is this person, account, or organization on the public internet right now?**
 
 It collects public signals (credential leaks, public code, DNS/email posture, social exposure, indexed content, and Shodan metadata), scores them, and exports a report pack that is immediately usable by security teams or clients.
+
+---
+
+> Currently, I do not have premium access to HIBP/LeakCheck, which is why I tested using the "--demo-mode." However, I am confident that they will work perfectly.
+
+### Pictures
+
+<details>
+
+<summary>Click to expand</summary>
+
+<div align="center">
+
+![CLI Interface](PICs/CLI.png)
+
+![Exposure Graph](PICs/exposure_graph-html.png)
+
+![Report](PICs/report-html.png)
+
+![Project Structure](PICs/project_structure_and_output_folder.png)
+
+</div>
+
+--- 
+
+</details>
+
+### Live Outputs: 
+
+- exposure_graph.html: https://sagarbiswas-multihat.github.io/osint-exposure-toolkit/output/target_2026-03-25_05-52/exposure_graph.html
+
+- report.html: https://sagarbiswas-multihat.github.io/osint-exposure-toolkit/output/target_2026-03-25_05-52/report.html
 
 ---
 
@@ -331,6 +367,16 @@ python main.py --domain example.com --modules github,js,dns,shodan
 
 ```bash
 python main.py --email user@example.com --domain example.com --output html,json --no-graph
+```
+
+### 7) Tested 
+
+```bash
+python main.py \
+  --email security@shopify.com \
+  --domain shopify.com \
+  --username tobi \
+  --demo-mode
 ```
 
 ---
