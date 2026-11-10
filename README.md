@@ -4,6 +4,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
+[![Sponsor SagarBiswas-MultiHAT on Polar.sh](https://img.shields.io/badge/Sponsor-Polar.sh-0062FF?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://buy.polar.sh/polar_cl_I7DT5UQNUs1Qjb4VrFYOiRA2nkb3RVVUJCnjr3o5SGK)
 
 </div>
 
@@ -64,6 +65,7 @@ It collects public signals (credential leaks, public code, DNS/email posture, so
 - [Troubleshooting](#troubleshooting)
 - [Testing and quality](#testing-and-quality)
 - [Ethics and legal use](#ethics-and-legal-use)
+- [Support MultiHAT Open-Source](#support-multihat-open-source)
 - [License](#license)
 
 ---
@@ -423,6 +425,16 @@ Suggested release gate:
 Use this toolkit only on assets you own or are explicitly authorized to assess.
 
 The toolkit is intentionally passive, but passive reconnaissance can still create legal or contractual risk in some environments without prior approval.
+
+---
+
+## Support MultiHAT Open-Source
+
+If you find this project useful in your workflow, development, or security research, consider supporting **SagarBiswas-MultiHAT** in its ongoing maintenance and future updates (supports both One-Time and Monthly backing):
+
+[![Support on Polar.sh](https://img.shields.io/badge/Support%20on-Polar.sh-0062FF?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://buy.polar.sh/polar_cl_I7DT5UQNUs1Qjb4VrFYOiRA2nkb3RVVUJCnjr3o5SGK)
+[![Portfolio](https://img.shields.io/badge/Portfolio-sagarbiswas.multihat.dev-2563EB?style=for-the-badge&logo=todoist&logoColor=white)](https://sagarbiswas.multihat.dev/)
+[![Agency](https://img.shields.io/badge/Agency-multihat.dev-111827?style=for-the-badge&logo=vercel&logoColor=white)](https://multihat.dev)
 
 ---
 
